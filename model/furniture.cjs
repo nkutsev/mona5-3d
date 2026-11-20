@@ -94,25 +94,42 @@ module.exports = function furniture(scene, kit, reference) {
   place('Oven tower', 'Колона с фурна', kitchen, [122.65, 461, 0], -90);
   place('Fridge', 'Хладилник с две врати', kitchen, [122.5, 401, 0], -90, [60 / 90, 61 / 74, 1]);
 
-  place('Dining table', 'Трапезна маса', kitchen, [311, 592, 0], 0, [.84, 130 / 140, 1]);
+  // The island occupies the south side of the larger kitchen; the dining set
+  // stays beyond it, with a clear route from the entrance hall on the west.
+  const island = item('Кухненски остров с чекмеджета', kitchen, [400, 445, 0], [124, 74, 94]);
+  box(island, [0, 0, 4], [110, 60, 8], m.oak);
+  for (const x of [-57, 57]) box(island, [x, 0, 46], [2, 66, 82], m.lightwood);
+  box(island, [0, 32, 46], [116, 2, 82], m.lightwood);
+  for (const z of [9, 86]) box(island, [0, 0, z], [114, 64, 2], m.lightwood);
+  for (const x of [-28.5, 28.5]) for (const [row, z] of [29, 65].entries()) {
+    const g = part(island, {type:'slide',vec:[0,-32,0],kind:'Чекмедже',
+      id:'КО1',w:55,h:34,c:[x,-34,z],n:[0,-1,0]});
+    box(island, [x,-33,z], [55,2,34], m.white, g);
+    box(island, [x,-2,z-15], [51,58,2], m.oak, g);
+    for (const side of [-24.5,24.5]) box(island, [x+side,-2,z-7], [2,58,18], m.oak, g);
+    box(island, [x,-30,z+10], [18,1.5,1.5], m.steel, g);
+  }
+  box(island, [0, 0, 90], [124,74,4], m.travertine);
+
+  place('Dining table', 'Трапезна маса', kitchen, [400, 606, 0], 0, [.84, 130 / 140, 1]);
   for (const [index, x, y, rotation] of [
-    [1, 253, 561, 0], [2, 253, 623, 0], [3, 369, 561, 180], [4, 369, 623, 180]
+    [1, 342, 575, 0], [2, 342, 637, 0], [3, 458, 575, 180], [4, 458, 637, 180]
   ]) place('Dining chair 1', 'Трапезен стол ' + index, kitchen, [x, y, 0], rotation);
-  place('Bowl (dining table)', 'Купа на трапезната маса', kitchen, [311, 592, 76]);
-  for (const [i, y] of [561, 624].entries()) {
-    place('Pendant light 1', 'Пендел ' + (i + 1), kitchen, [311, y, 168], 0, [1, 1, (scene.H - 168) / 81.5]);
+  place('Bowl (dining table)', 'Купа на трапезната маса', kitchen, [400, 606, 76]);
+  for (const [i, y] of [575, 638].entries()) {
+    place('Pendant light 1', 'Пендел ' + (i + 1), kitchen, [400, y, 168], 0, [1, 1, (scene.H - 168) / 81.5]);
   }
 
-  place('Sofa', 'Ъглов диван с лежанка', living, [659, 628, 0], 180, [.96, 165 / 185, 1]);
-  place('Rug (living room)', 'Килим в дневната', living, [656, 553, .15], 0, [248 / 270, 172 / 270, .7]);
-  place('Coffee table', 'Холна маса от травертин', living, [626, 547, 0], 0, [.82, .82, 1]);
-  place('Vase & candle (coffee table)', 'Ваза и свещ', living, [625.5, 545.4, 38], 0, [.85, .85, .9]);
+  place('Sofa', 'Ъглов диван с лежанка', living, [800, 628, 0], 180, [.96, 165 / 185, 1]);
+  place('Rug (living room)', 'Килим в дневната', living, [797, 553, .15], 0, [248 / 270, 172 / 270, .7]);
+  place('Coffee table', 'Холна маса от травертин', living, [767, 547, 0], 0, [.82, .82, 1]);
+  place('Vase & candle (coffee table)', 'Ваза и свещ', living, [766.5, 545.4, 38], 0, [.85, .85, .9]);
   place('TV cabinet (floating)', 'Окачен ТВ шкаф', living, [652, 394.5, 17.4], 180);
   place('TV slat wall', 'Ламели зад телевизора', living, [706, 375, 61], 180);
-  place('TV', 'Телевизор', living, [652, 377.5, 98.5], 180, [.82, 1, .82]);
-  place('Wall art', 'Картина над дивана', living, [650, 718.2, 112], 180);
+  place('TV', 'Телевизор', living, [652, 377.5, 130], 180, [.82, 1, .82]);
+  place('Wall art', 'Картина над дивана', living, [791, 718.2, 112], 180);
 
-  const desk = place('Desk (bedroom 2)', 'Работно бюро с монитор', living, [861, 682, 0], 90, [1, .85, 1]);
+  const desk = place('Desk (bedroom 2)', 'Работно бюро с монитор', living, [760, 440, 0], 0, [1, .85, 1]);
   box(desk, [12, 0, 76], [22, 30, 2], m.black);
   box(desk, [12.5, 0, 86], [4, 6, 21], m.metal);
   box(desk, [7.3, 0, 110], [.55, 65, 27.5], m.tv);
@@ -123,7 +140,7 @@ module.exports = function furniture(scene, kit, reference) {
     }
   }
   cylinder(desk, [-12, 28, 76], 4.8, 3.1, 2, m.black, -1, 12);
-  const chair = item('Работен стол', living, [861, 623, 0], [53, 54, 96], 0);
+  const chair = item('Работен стол', living, [700, 465, 0], [53, 54, 96], 0);
   cylinder(chair, [0, 0, 25], 3, 3, 35, m.metal, -1, 16);
   for (let leg = 0; leg < 5; leg++) {
     const a = Math.PI * 2 * leg / 5;
