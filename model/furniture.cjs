@@ -168,4 +168,6 @@ module.exports = function furniture(scene, kit, reference) {
     }
   }
   place('Hall storage bench', 'Пейка за обувки', 'Антре', [46, 342, 0], -90, [1, .87, 1]);
+  place('Wardrobe (Bedroom 1)', 'Гардероб в антрето', 'Антре',
+    [160, 327, 0], 180, [140 / 226, 1, 1]);
 };

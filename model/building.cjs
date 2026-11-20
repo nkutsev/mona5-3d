@@ -76,8 +76,8 @@ module.exports = function buildApartment(D, kit) {
   floorRect(344,0,814,366,m.herring);
   floorRect(814,0,950,366,m.outtile,false);
   floorRect(344,366,950,372,m.herring);
-  floorRect(90,372,454,720,m.herring);
-  floorRect(454,372,925,720,m.herring);
+  floorRect(90,372,505,720,m.herring);
+  floorRect(505,372,925,720,m.herring);
   floorRect(925,372,950,695,m.herring);
 
   const arc = Array.from({length:13},(_,i) => {
@@ -93,7 +93,9 @@ module.exports = function buildApartment(D, kit) {
   // Exterior envelope. The entry leaf occupies the entrance portal in the hall.
   wall(-13,-10,960,-10,20);
   wall(-12,0,-12,372,24);
-  wall(-24,372,90,372,20);
+  // Extend the entrance wall to back the hall wardrobe while preserving a
+  // 109 cm opening to the kitchen and living area.
+  wall(-24,372,235,372,20);
   wall(78,372,78,730,24);
   wall(66,730,925,730,20);
   for (let i=0; i<arc.length-1; i++) {
@@ -170,9 +172,9 @@ module.exports = function buildApartment(D, kit) {
 
   // Fixed upper/lower tracks with one mesh group per folding leaf.
   const divider = item('Сгъваема стъклена преграда','Дневна и кабинет',
-    [454,546,0],[5,348,252]);
+    [505,546,0],[5,348,252]);
   divider.isFixed = true;
-  divider.fold = {x:454,y:372,length:348,count:6,localStart:-174,angle:87};
+  divider.fold = {x:505,y:372,length:348,count:6,localStart:-174,angle:87};
   bounds(divider,-2.5,-174,.1,2.5,174,.8,m.steel);
   bounds(divider,-3,-174,249,3,174,253,m.metal);
   for (let i=0; i<6; i++) {
