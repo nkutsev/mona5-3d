@@ -93,7 +93,9 @@ module.exports = function buildApartment(D, kit) {
   // Exterior envelope. The entry leaf occupies the entrance portal in the hall.
   wall(-13,-10,960,-10,20);
   wall(-12,0,-12,372,24);
-  wall(-24,372,90,372,20);
+  // The entrance-side wall continues past the kitchen corner to the point
+  // shown on the dimensioned plan, near the bathroom door's left edge.
+  wall(-24,372,154,372,20);
   wall(78,372,78,730,24);
   wall(66,730,925,730,20);
   for (let i=0; i<arc.length-1; i++) {
