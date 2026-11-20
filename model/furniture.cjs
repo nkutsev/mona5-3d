@@ -17,6 +17,7 @@ const frontNames = {
   'Wall door (lift inside)': 'Врата с вътрешен механизъм', 'Wardrobe drawer': 'Чекмедже на гардероба',
   'Bench drawer': 'Чекмедже на пейката', 'Glass door': 'Остъклена врата',
   'Bottle pull-out': 'Изтеглящ се шкаф за бутилки',
+  'Corner door': 'Врата на ъглов шкаф', 'Carousel': 'Ъглова въртележка',
 };
 
 const rounded = value => Math.round(value * 1000) / 1000;
@@ -109,11 +110,11 @@ module.exports = function furniture(scene, kit, reference) {
   const north = item('Северен ред кухненски шкафове', kitchen,
     [228.75, 685, 0], [217.5, 65, 94]);
   box(north, [0, 0, 4], [209.5, 57, 8], m.oak);
-  for (const x of [-105.75, 105.75, -35.5, 35.5])
+  for (const x of [-105.75, -35.5, 35.5])
     box(north, [x, 0, 49], [2, 61, 78], m.oak);
-  for (const z of [10,87]) box(north, [0, 0, z], [213.5,61,2], m.oak);
-  box(north,[0,29.5,49],[213.5,2,78],m.oak);
-  box(north,[0,-31,84],[213.5,2,4],m.kwood);
+  for (const z of [10,87]) box(north, [-35.625, 0, z], [142.25,61,2], m.oak);
+  box(north,[-35.625,29.5,49],[142.25,2,78],m.oak);
+  box(north,[-35.625,-31,84],[142.25,2,4],m.kwood);
   for (const [bay,x] of [-71,0].entries()) for(const [row,z] of [29,65].entries()) {
     const kind=row===1?(bay===0?'Органайзер за прибори':'Чекмедже за чинии')
       :(bay===0?'Чекмедже за тенджери':'Чекмедже за тигани');
@@ -132,18 +133,10 @@ module.exports = function furniture(scene, kit, reference) {
     if(row===0&&bay===1)for(const offset of [-18,18])
       cylinder(north,[x+offset,-1,z-13],12,12,3,m.steel,g,16);
   }
-  // The tight junction with the return uses Vidol's carousel idea instead of
-  // deep, hard-to-reach drawers.
-  const cornerDoor=part(north,{type:'hinge',pivot:[37,-31,0],axis:[0,0,1],
-    angle:-95,kind:'Врата на ъглов шкаф',id:'КЪ1',w:68,h:74,
-    c:[71,-31,48],n:[0,-1,0]});
-  box(north,[71,-31,48],[68,2,74],m.kwood,cornerDoor);
-  box(north,[71,-33,47],[1.5,1.5,18],m.steel,cornerDoor);
-  const carousel=part(north,{type:'hinge',pivot:[71,0,0],axis:[0,0,1],
-    angle:135,kind:'Ъглова въртележка',id:'КЪ2',w:58,h:72,
-    c:[71,0,49],n:[0,0,1]});
-  cylinder(north,[71,0,48],2,2,68,m.steel,carousel,12);
-  for(const z of [30,65])cylinder(north,[71,0,z],28,25,2,m.oak,carousel,24);
+  // Use the actual Vidol corner module, including its linked doors and rotating
+  // internal shelves. A half turn points both accessible faces into the U.
+  place('Corner unit (carousel)', 'Ъглов шкаф с въртележка Видол', kitchen,
+    [299.75,685,10.2], 180, [68/70,65/87.5,1]);
 
   const peninsula = item('Свързан кухненски полуостров', kitchen,
     [305, 577, 0], [65, 152, 94]);
