@@ -124,7 +124,7 @@ module.exports = function furniture(scene, kit, reference) {
     box(north,[x,-1,z-15],[64,53,2],m.oak,g);
     for(const side of [-31,31])box(north,[x+side,-1,z-7],[2,53,18],m.oak,g);
     box(north,[x,25,z-7],[64,2,18],m.oak,g);
-    box(north,[x,-32,z+14.5],[64,.5,.7],m.groove,g);
+    box(north,[x,-32,z+14],[64,.5,4],m.groove,g);
     box(north,[x,-33,z+10],[18,1.5,1.5],m.steel,g);
     if(row===1&&bay===0)for(const offset of [-18,-6,6,18])
       box(north,[x+offset,-2,z-7],[1.2,43,14],m.lightwood,g);
@@ -155,7 +155,7 @@ module.exports = function furniture(scene, kit, reference) {
     box(peninsula,[0,y,z-15],[54,43,2],m.oak,g);
     for(const side of [-20.5,20.5])box(peninsula,[0,y+side,z-7],[54,2,18],m.oak,g);
     box(peninsula,[26,y,z-7],[2,43,18],m.oak,g);
-    box(peninsula,[-33,y,z+14.5],[.5,43,.7],m.groove,g);
+    box(peninsula,[-33,y,z+14],[.5,43,4],m.groove,g);
     box(peninsula,[-34,y,z+10],[1.5,18,1.5],m.steel,g);
     if(bay===2&&row===0)for(const side of [-11,11]) {
       box(peninsula,[0,y+side,z-7],[24,18,15],m.black,g);
