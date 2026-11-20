@@ -105,14 +105,14 @@ module.exports = function furniture(scene, kit, reference) {
   // The west run, north run and connected southward return form the U in the
   // reference. The dining set sits east of the return, beside the glass.
   const north = item('Северен ред кухненски шкафове', kitchen,
-    [236.5, 685, 0], [233, 65, 94]);
-  box(north, [0, 0, 4], [225, 57, 8], m.oak);
-  box(north, [0, 0, 49], [229, 61, 80], m.oak);
-  for (const x of [-76, 0, 76]) for(const z of [29,65]) {
+    [228.75, 685, 0], [217.5, 65, 94]);
+  box(north, [0, 0, 4], [209.5, 57, 8], m.oak);
+  box(north, [0, 0, 49], [213.5, 61, 80], m.oak);
+  for (const x of [-71, 0, 71]) for(const z of [29,65]) {
     const g=part(north,{type:'slide',vec:[0,-30,0],kind:'Чекмедже',
-      id:'КС1',w:73,h:34,c:[x,-31,z],n:[0,-1,0]});
-    box(north,[x,-31,z],[73,2,34],m.kwood,g);
-    box(north,[x,-1,z-15],[69,55,2],m.oak,g);
+      id:'КС1',w:68,h:34,c:[x,-31,z],n:[0,-1,0]});
+    box(north,[x,-31,z],[68,2,34],m.kwood,g);
+    box(north,[x,-1,z-15],[64,55,2],m.oak,g);
     box(north,[x,-32,z+10],[18,1.5,1.5],m.steel,g);
   }
 
@@ -120,18 +120,19 @@ module.exports = function furniture(scene, kit, reference) {
     [305, 577, 0], [65, 152, 94]);
   box(peninsula, [0, 0, 4], [57, 144, 8], m.oak);
   box(peninsula, [0, 0, 49], [61, 148, 80], m.oak);
+  box(peninsula, [31.5, 0, 49], [2, 148, 80], m.kwood);
   for (const y of [-50, 0, 50]) for (const z of [29, 65]) {
-    const g=part(peninsula,{type:'slide',vec:[30,0,0],kind:'Чекмедже',
-      id:'КП1',w:47,h:34,c:[32,y,z],n:[1,0,0]});
-    box(peninsula,[32,y,z],[2,47,34],m.kwood,g);
+    const g=part(peninsula,{type:'slide',vec:[-30,0,0],kind:'Чекмедже',
+      id:'КП1',w:47,h:34,c:[-32,y,z],n:[-1,0,0]});
+    box(peninsula,[-32,y,z],[2,47,34],m.kwood,g);
     box(peninsula,[1,y,z-15],[57,43,2],m.oak,g);
-    box(peninsula,[34,y,z+10],[1.5,18,1.5],m.steel,g);
+    box(peninsula,[-34,y,z+10],[1.5,18,1.5],m.steel,g);
   }
   const worktop=item('Непрекъснат П-образен кухненски плот', kitchen,
-    [222.5,604.25,88],[261,226.5,4]);
-  box(worktop,[-98,-32.5,2],[65,161.5,4],m.marble);
-  box(worktop,[0,80.75,2],[261,65,4],m.marble);
-  box(worktop,[82.5,-27.5,2],[65,151.5,4],m.marble);
+    [214.75,604.25,88],[245.5,226.5,4]);
+  box(worktop,[-90.25,-32.5,2],[65,161.5,4],m.marble);
+  box(worktop,[0,80.75,2],[245.5,65,4],m.marble);
+  box(worktop,[90.25,-27.5,2],[65,151.5,4],m.marble);
 
   place('Dining table', 'Трапезна маса', kitchen, [450, 590, 0], 0, [.84, 130 / 140, 1]);
   for (const [index, x, y, rotation] of [
