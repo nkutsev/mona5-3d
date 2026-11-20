@@ -6,9 +6,9 @@ function panelPose(ob, index, fraction) {
   const fromNorth=f.count-1-index;
   const hingeY=base+index*span;
   return {
-    angle: (fromNorth%2===0?1:-1)*angle,
+    angle: (fromNorth%2===0?-1:1)*angle,
     pivot: [0,hingeY,0],
-    shift: [fromNorth%2===0?span*Math.sin(angle):0,
+    shift: [fromNorth%2===0?-span*Math.sin(angle):0,
             (fromNorth+1)*span*(1-Math.cos(angle)),0]
   };
 }
