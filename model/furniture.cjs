@@ -83,7 +83,15 @@ module.exports = function furniture(scene, kit, reference) {
       runCentre[1] + (original.anchor[1] - base.anchor[1]) * runScale[1], original.anchor[2]];
     return place(sourceName, name, kitchen, anchor, 0, runScale);
   }
-  kitchenModule('Base cabinets + worktop (right wall)', 'Долни кухненски шкафове с плот');
+  const westRun = kitchenModule('Base cabinets + worktop (right wall)', 'Долни кухненски шкафове с плот');
+  // Replace the reference run's two top triangles with one continuous U top.
+  const keep=[];
+  for(let t=0;t<westRun.mat.length;t++) {
+    const z=[westRun.pos[t*9+2],westRun.pos[t*9+5],westRun.pos[t*9+8]];
+    if(!(westRun.mat[t]===m.marble&&z.every(v=>Math.abs(v-92)<.01)))keep.push(t);
+  }
+  westRun.pos=keep.flatMap(t=>westRun.pos.slice(t*9,t*9+9));
+  for(const field of ['mat','par','pt'])westRun[field]=keep.map(t=>westRun[field][t]);
   kitchenModule('Upper cabinets', 'Горни кухненски шкафове');
   kitchenModule('Splashback', 'Кухненски гръб');
   kitchenModule('Sink', 'Кухненска мивка');
@@ -100,7 +108,6 @@ module.exports = function furniture(scene, kit, reference) {
     [236.5, 685, 0], [233, 65, 94]);
   box(north, [0, 0, 4], [225, 57, 8], m.oak);
   box(north, [0, 0, 49], [229, 61, 80], m.white);
-  box(north, [0, 0, 90], [233, 65, 4], m.travertine);
   for (const x of [-76, 0, 76]) {
     const g=part(north,{type:'slide',vec:[0,-30,0],kind:'Чекмедже',
       id:'КС1',w:73,h:35,c:[x,-31,68],n:[0,-1,0]});
@@ -112,7 +119,7 @@ module.exports = function furniture(scene, kit, reference) {
   const peninsula = item('Свързан кухненски полуостров', kitchen,
     [305, 577, 0], [65, 152, 94]);
   box(peninsula, [0, 0, 4], [57, 144, 8], m.oak);
-  box(peninsula, [0, 0, 48], [61, 148, 78], m.white);
+  box(peninsula, [0, 0, 49], [61, 148, 80], m.white);
   for (const y of [-50, 0, 50]) for (const z of [29, 65]) {
     const g=part(peninsula,{type:'slide',vec:[30,0,0],kind:'Чекмедже',
       id:'КП1',w:47,h:34,c:[32,y,z],n:[1,0,0]});
@@ -120,7 +127,11 @@ module.exports = function furniture(scene, kit, reference) {
     box(peninsula,[1,y,z-15],[57,43,2],m.oak,g);
     box(peninsula,[34,y,z+10],[1.5,18,1.5],m.steel,g);
   }
-  box(peninsula, [0, 0, 90], [65,152,4], m.travertine);
+  const worktop=item('Непрекъснат П-образен кухненски плот', kitchen,
+    [222.5,604.25,88],[261,226.5,4]);
+  box(worktop,[-98,-32.5,2],[65,161.5,4],m.marble);
+  box(worktop,[0,80.75,2],[261,65,4],m.marble);
+  box(worktop,[82.5,-27.5,2],[65,151.5,4],m.marble);
 
   place('Dining table', 'Трапезна маса', kitchen, [450, 590, 0], 0, [.84, 130 / 140, 1]);
   for (const [index, x, y, rotation] of [
@@ -135,12 +146,11 @@ module.exports = function furniture(scene, kit, reference) {
   place('Rug (living room)', 'Килим в дневната', living, [797, 553, .15], 0, [248 / 270, 172 / 270, .7]);
   place('Coffee table', 'Холна маса от травертин', living, [767, 547, 0], 0, [.82, .82, 1]);
   place('Vase & candle (coffee table)', 'Ваза и свещ', living, [766.5, 545.4, 38], 0, [.85, .85, .9]);
-  place('TV cabinet (floating)', 'Окачен ТВ шкаф', living, [652, 394.5, 17.4], 180);
   place('TV slat wall', 'Ламели зад телевизора', living, [706, 375, 61], 180);
   place('TV', 'Телевизор', living, [652, 377.5, 130], 180, [.82, 1, .82]);
   place('Wall art', 'Картина над дивана', living, [791, 718.2, 112], 180);
 
-  const desk = place('Desk (bedroom 2)', 'Работно бюро с монитор', living, [760, 440, 0], 0, [1, .85, 1]);
+  const desk = place('Desk (bedroom 2)', 'Работно бюро с монитор', living, [652, 430, 0], 90, [1, .85, 1]);
   box(desk, [12, 0, 76], [22, 30, 2], m.black);
   box(desk, [12.5, 0, 86], [4, 6, 21], m.metal);
   box(desk, [7.3, 0, 110], [.55, 65, 27.5], m.tv);
@@ -151,7 +161,7 @@ module.exports = function furniture(scene, kit, reference) {
     }
   }
   cylinder(desk, [-12, 28, 76], 4.8, 3.1, 2, m.black, -1, 12);
-  const chair = item('Работен стол', living, [700, 465, 0], [53, 54, 96], 0);
+  const chair = item('Работен стол', living, [652, 495, 0], [53, 54, 96], 0);
   cylinder(chair, [0, 0, 25], 3, 3, 35, m.metal, -1, 16);
   for (let leg = 0; leg < 5; leg++) {
     const a = Math.PI * 2 * leg / 5;
