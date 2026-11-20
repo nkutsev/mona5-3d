@@ -107,26 +107,67 @@ module.exports = function furniture(scene, kit, reference) {
   const north = item('Северен ред кухненски шкафове', kitchen,
     [228.75, 685, 0], [217.5, 65, 94]);
   box(north, [0, 0, 4], [209.5, 57, 8], m.oak);
-  box(north, [0, 0, 49], [213.5, 61, 80], m.oak);
-  for (const x of [-71, 0, 71]) for(const z of [29,65]) {
-    const g=part(north,{type:'slide',vec:[0,-30,0],kind:'Чекмедже',
+  for (const x of [-105.75, 105.75, -35.5, 35.5])
+    box(north, [x, 0, 49], [2, 61, 78], m.oak);
+  for (const z of [10,87]) box(north, [0, 0, z], [213.5,61,2], m.oak);
+  box(north,[0,29.5,49],[213.5,2,78],m.oak);
+  for (const [bay,x] of [-71,0].entries()) for(const [row,z] of [29,65].entries()) {
+    const kind=row===1?(bay===0?'Органайзер за прибори':'Чекмедже за чинии')
+      :(bay===0?'Чекмедже за тенджери':'Чекмедже за тигани');
+    const g=part(north,{type:'slide',vec:[0,-30,0],kind,
       id:'КС1',w:68,h:34,c:[x,-31,z],n:[0,-1,0]});
     box(north,[x,-31,z],[68,2,34],m.kwood,g);
-    box(north,[x,-1,z-15],[64,55,2],m.oak,g);
-    box(north,[x,-32,z+10],[18,1.5,1.5],m.steel,g);
+    box(north,[x,-1,z-15],[64,53,2],m.oak,g);
+    for(const side of [-31,31])box(north,[x+side,-1,z-7],[2,53,18],m.oak,g);
+    box(north,[x,25,z-7],[64,2,18],m.oak,g);
+    box(north,[x,-32,z+14.5],[64,.5,.7],m.groove,g);
+    box(north,[x,-33,z+10],[18,1.5,1.5],m.steel,g);
+    if(row===1&&bay===0)for(const offset of [-18,-6,6,18])
+      box(north,[x+offset,-2,z-7],[1.2,43,14],m.lightwood,g);
+    if(row===1&&bay===1)for(const offset of [-19,0,19])
+      cylinder(north,[x+offset,-1,z-13],9,9,2,m.white,g,16);
+    if(row===0&&bay===1)for(const offset of [-18,18])
+      cylinder(north,[x+offset,-1,z-13],12,12,3,m.steel,g,16);
   }
+  // The tight junction with the return uses Vidol's carousel idea instead of
+  // deep, hard-to-reach drawers.
+  const cornerDoor=part(north,{type:'hinge',pivot:[37,-31,0],axis:[0,0,1],
+    angle:-95,kind:'Врата на ъглов шкаф',id:'КЪ1',w:68,h:74,
+    c:[71,-31,48],n:[0,-1,0]});
+  box(north,[71,-31,48],[68,2,74],m.kwood,cornerDoor);
+  box(north,[71,-33,47],[1.5,1.5,18],m.steel,cornerDoor);
+  const carousel=part(north,{type:'hinge',pivot:[71,0,0],axis:[0,0,1],
+    angle:135,kind:'Ъглова въртележка',id:'КЪ2',w:58,h:72,
+    c:[71,0,49],n:[0,0,1]});
+  cylinder(north,[71,0,48],2,2,68,m.steel,carousel,12);
+  for(const z of [30,65])cylinder(north,[71,0,z],28,25,2,m.oak,carousel,24);
 
   const peninsula = item('Свързан кухненски полуостров', kitchen,
     [305, 577, 0], [65, 152, 94]);
   box(peninsula, [0, 0, 4], [57, 144, 8], m.oak);
-  box(peninsula, [0, 0, 49], [61, 148, 80], m.oak);
+  for(const y of [-73,73,-25,25])box(peninsula,[0,y,49],[61,2,78],m.oak);
+  for(const z of [10,87])box(peninsula,[0,0,z],[61,148,2],m.oak);
   box(peninsula, [31.5, 0, 49], [2, 148, 80], m.kwood);
-  for (const y of [-50, 0, 50]) for (const z of [29, 65]) {
-    const g=part(peninsula,{type:'slide',vec:[-30,0,0],kind:'Чекмедже',
+  for (const [bay,y] of [-50,0,50].entries()) for (const [row,z] of [29,65].entries()) {
+    const kind=bay===2?(row?'Поставка за препарати':'Изтеглящ се кош')
+      :bay===1?(row?'Шкаф за бутилки':'Шкаф за запаси')
+      :(row?'Органайзер за прибори':'Дълбоко чекмедже');
+    const g=part(peninsula,{type:'slide',vec:[-30,0,0],kind,
       id:'КП1',w:47,h:34,c:[-32,y,z],n:[-1,0,0]});
     box(peninsula,[-32,y,z],[2,47,34],m.kwood,g);
-    box(peninsula,[1,y,z-15],[57,43,2],m.oak,g);
+    box(peninsula,[0,y,z-15],[54,43,2],m.oak,g);
+    for(const side of [-20.5,20.5])box(peninsula,[0,y+side,z-7],[54,2,18],m.oak,g);
+    box(peninsula,[26,y,z-7],[2,43,18],m.oak,g);
+    box(peninsula,[-33,y,z+14.5],[.5,43,.7],m.groove,g);
     box(peninsula,[-34,y,z+10],[1.5,18,1.5],m.steel,g);
+    if(bay===2&&row===0)for(const side of [-11,11]) {
+      box(peninsula,[0,y+side,z-7],[24,18,15],m.black,g);
+      box(peninsula,[0,y+side,z+1],[26,20,1],m.steel,g);
+    }
+    if(bay===1&&row===1)for(const side of [-12,12])
+      cylinder(peninsula,[0,y+side,z-4],5,5,17,m.olive,g,12);
+    if(bay===0&&row===1)for(const side of [-11,0,11])
+      box(peninsula,[0,y+side,z-7],[43,1.2,14],m.lightwood,g);
   }
   const worktop=item('Непрекъснат П-образен кухненски плот', kitchen,
     [214.75,604.25,88],[245.5,226.5,4]);
