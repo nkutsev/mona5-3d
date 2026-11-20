@@ -76,7 +76,9 @@ module.exports = function furniture(scene, kit, reference) {
   // Keep the internals, splashback, sink cut-out and extractor aligned when
   // installing the entire cabinet run on the opposite wall.
   const base = sources.get('Base cabinets + worktop (right wall)');
-  const runCentre = [124.5, 604], runScale = [-1, 226 / 267, 1];
+  // Stop at the north run instead of occupying its corner cabinet. Keep the
+  // oven and fridge immediately south of this run.
+  const runCentre = [124.5, 572], runScale = [-1, 160 / 267, 1];
   function kitchenModule(sourceName, name) {
     const original = sources.get(sourceName);
     const anchor = [runCentre[0] - (original.anchor[0] - base.anchor[0]),
@@ -111,6 +113,7 @@ module.exports = function furniture(scene, kit, reference) {
     box(north, [x, 0, 49], [2, 61, 78], m.oak);
   for (const z of [10,87]) box(north, [0, 0, z], [213.5,61,2], m.oak);
   box(north,[0,29.5,49],[213.5,2,78],m.oak);
+  box(north,[0,-31,84],[213.5,2,4],m.kwood);
   for (const [bay,x] of [-71,0].entries()) for(const [row,z] of [29,65].entries()) {
     const kind=row===1?(bay===0?'Органайзер за прибори':'Чекмедже за чинии')
       :(bay===0?'Чекмедже за тенджери':'Чекмедже за тигани');
@@ -148,6 +151,7 @@ module.exports = function furniture(scene, kit, reference) {
   for(const y of [-73,73,-25,25])box(peninsula,[0,y,49],[61,2,78],m.oak);
   for(const z of [10,87])box(peninsula,[0,0,z],[61,148,2],m.oak);
   box(peninsula, [31.5, 0, 49], [2, 148, 80], m.kwood);
+  box(peninsula, [-31.5, 0, 84], [2, 148, 4], m.kwood);
   for (const [bay,y] of [-50,0,50].entries()) for (const [row,z] of [29,65].entries()) {
     const kind=bay===2?(row?'Поставка за препарати':'Изтеглящ се кош')
       :bay===1?(row?'Шкаф за бутилки':'Шкаф за запаси')
