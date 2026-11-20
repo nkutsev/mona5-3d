@@ -1,13 +1,15 @@
-// The six panels share one opening fraction. Successive hinge positions follow
-// the preceding panel, keeping the chain connected throughout the animation.
+// The six panels share one opening fraction and park at the north end.
+// Successive hinges stay connected throughout the animation.
 function panelPose(ob, index, fraction) {
   const f=ob.fold, span=f.length/f.count, base=f.localStart;
   const angle=ease(fraction)*f.angle*Math.PI/180;
+  const fromNorth=f.count-1-index;
   const hingeY=base+index*span;
   return {
-    angle: (index%2===0?-1:1)*angle,
+    angle: (fromNorth%2===0?1:-1)*angle,
     pivot: [0,hingeY,0],
-    shift: [(index%2)*span*Math.sin(angle), index*span*(Math.cos(angle)-1),0]
+    shift: [fromNorth%2===0?span*Math.sin(angle):0,
+            (fromNorth+1)*span*(1-Math.cos(angle)),0]
   };
 }
 function foldingSegments() {
