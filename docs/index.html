@@ -74,7 +74,7 @@ SOFTWARE.
 <aside id="side" aria-label="Инструменти на редактора"><header class="project-head"><div class="mark" aria-hidden="true"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3zM3 11h8V3m0 8v10m0-7h10"/></svg></div><div><div class="project-name">МОНА 5</div><h1>Апартамент Д15</h1></div></header>
 <div class="side-scroll">
 <section class="scene-controls" aria-labelledby="scene-controls-title"><h2 class="section-title" id="scene-controls-title">Управление на модела</h2>
-<div class="scene-grid"><button id="bFold" aria-pressed="false">Отвори преградата</button><button id="mDoors">Отвори шкафовете</button><button id="mCut"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 8-5 10 5v10l-5 2M3 9v7l8 4m0-5v5m-8-6 8 5 10-6" stroke-dasharray="0"/><path d="m3 9 8 5 10-5"/></svg>Срез на стените</button><button id="mDims" class="on"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="m3 15 12-12 6 6-12 12zm9-9 3 3m-6 0 2 2m-5 1 3 3"/></svg>Отстояния</button></div>
+<div class="scene-grid"><button id="bFold" aria-pressed="false">Отвори преградата</button><button id="mDoors">Отвори шкафовете</button><button id="mDims" class="on"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="m3 15 12-12 6 6-12 12zm9-9 3 3m-6 0 2 2m-5 1 3 3"/></svg>Отстояния</button></div>
 <details class="advanced"><summary><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10m4 0h2M4 17h2m4 0h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Настройки на изгледа</summary><div class="settings-row"><button id="mIds">Номера и размери</button><button id="mOver">Разреши застъпване</button></div></details></section>
 <div id="variants"></div>
 <section id="props"><button class="back" id="backToObjects"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg>Към мебелите</button><h2 id="pName"></h2><div class="room" id="pRoom"></div>
@@ -128,19 +128,11 @@ vec3 herring(vec2 xy,float ang){float a=radians(ang+45.);float Wd=10.;
  float e=min(min(lu*n*Wd,(1.-lu)*n*Wd),min(lv*Wd,(1.-lv)*Wd));float seam=clamp(e/.6,0.,1.)*.35+.65;
  return vec3(.75,.51,.32)*tone*grain*seam;}
 vec3 colOf(int i){for(int k=0;k<48;k++){if(k==i)return uCol[k];}return vec3(1.);}
-uniform vec2 uViewSide;
-  bool cutD15(vec3 p,float h){
-    if(h<=0.||p.z<=h)return false;
-    bool backY=(uViewSide.y<-.12 && p.y>=719.) || (uViewSide.y>.12 && p.y<=.05);
-    bool backX=(uViewSide.x>.12 && (p.x<=.05||(p.x<=90.05&&p.y>=372.))) ||
-               (uViewSide.x<-.12 && p.x>=949.);
-    return !(backX||backY);
-  }
-void main(){int m=int(vM+.5);if(cutD15(vW,uCut))discard;
+void main(){int m=int(vM+.5);
  if((m==44)!=(uPass>.5))discard;
  if(m==44){vec3 nn=normalize(vN);float fr=pow(1.-abs(dot(nn,normalize(uEye-vW))),3.);gl_FragColor=vec4(mix(vec3(.44,.64,.65),vec3(.83,.94,.96),fr),.115+.19*fr);return;}
  if(uHideCeil>.5&&m==2)discard;
- 
+ if(uCut>0.&&vW.z>uCut&&m!=3&&m!=4&&m!=15&&m!=12)discard;
  vec3 n=normalize(vN);if(dot(n,uEye-vW)<0.)n=-n;
  vec3 c=colOf(m);vec3 an=abs(n);
  float A=an.z>.7?vO.x:(an.x>an.y?vO.y:vO.x);float B=an.z>.7?vO.y:vO.z;
@@ -166,18 +158,10 @@ void main(){int m=int(vM+.5);if(cutD15(vW,uCut))discard;
  vec3 col=c*d*vec3(1.03,1.,.96);
  if(uSel>.5)col=mix(col,vec3(1.,.62,.25),.28);
  gl_FragColor=vec4(pow(col,vec3(.95)),1.);}`;
-const PVS=`attribute vec3 aP;attribute float aM;uniform mat4 uVP;uniform vec3 uT;uniform vec3 uS;uniform float uRot;uniform vec3 uPv;uniform vec3 uAx;uniform float uAn;uniform vec3 uSl;uniform vec3 uPv2;uniform vec3 uAx2;uniform float uAn2;varying vec3 pickWorld;varying float vm;
+const PVS=`attribute vec3 aP;attribute float aM;uniform mat4 uVP;uniform vec3 uT;uniform vec3 uS;uniform float uRot;uniform vec3 uPv;uniform vec3 uAx;uniform float uAn;uniform vec3 uSl;uniform vec3 uPv2;uniform vec3 uAx2;uniform float uAn2;varying float vz;varying float vm;
 vec3 rod(vec3 v,vec3 k,float a){return v*cos(a)+cross(k,v)*sin(a)+k*dot(k,v)*(1.-cos(a));}
-void main(){float c=cos(uRot),s=sin(uRot);vec3 p=(uPv2+rod(uPv+rod(aP-uPv,uAx,uAn)+uSl-uPv2,uAx2,uAn2))*uS;vec3 w=vec3(c*p.x-s*p.y,s*p.x+c*p.y,p.z)+uT;pickWorld=w;vm=aM;gl_Position=uVP*vec4(w,1.);}`;
-const PFS=`precision highp float;uniform vec3 uId;uniform float uCut;uniform float uHideCeil;varying vec3 pickWorld;varying float vm;uniform vec2 uViewSide;
-  bool cutD15(vec3 p,float h){
-    if(h<=0.||p.z<=h)return false;
-    bool backY=(uViewSide.y<-.12 && p.y>=719.) || (uViewSide.y>.12 && p.y<=.05);
-    bool backX=(uViewSide.x>.12 && (p.x<=.05||(p.x<=90.05&&p.y>=372.))) ||
-               (uViewSide.x<-.12 && p.x>=949.);
-    return !(backX||backY);
-  }
-void main(){int m=int(vm+.5);if(uHideCeil>.5&&m==2)discard;if(cutD15(pickWorld,uCut))discard;gl_FragColor=vec4(uId,1.);}`;
+void main(){float c=cos(uRot),s=sin(uRot);vec3 p=(uPv2+rod(uPv+rod(aP-uPv,uAx,uAn)+uSl-uPv2,uAx2,uAn2))*uS;vec3 w=vec3(c*p.x-s*p.y,s*p.x+c*p.y,p.z)+uT;vz=w.z;vm=aM;gl_Position=uVP*vec4(w,1.);}`;
+const PFS=`precision highp float;uniform vec3 uId;uniform float uCut;uniform float uHideCeil;varying float vz;varying float vm;void main(){int m=int(vm+.5);if(uHideCeil>.5&&m==2)discard;if(uCut>0.&&vz>uCut&&m!=3&&m!=4&&m!=15&&m!=12)discard;gl_FragColor=vec4(uId,1.);}`;
 const LVS=`attribute vec3 aP;uniform mat4 uVP;void main(){gl_Position=uVP*vec4(aP,1.);}`;
 const LFS=`precision mediump float;uniform vec3 uC;void main(){gl_FragColor=vec4(uC,1.);}`;
 function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(o);return o}
@@ -261,7 +245,7 @@ function persp(f,a,n,fa){const t=1/Math.tan(f/2);return[t/a,0,0,0,0,t,0,0,0,0,(f
 function look(e,c,u){const z=NRM(V(e,c)),x=NRM(CR(u,z)),y=CR(z,x);return[x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-DOT(x,e),-DOT(y,e),-DOT(z,e),1]}
 function mul(a,b){const r=new Array(16).fill(0);for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let k=0;k<4;k++)r[j*4+i]+=a[k*4+i]*b[j*4+k];return r}
 // ---------------------------------------------------------------- camera
-let mode='orbit',cut=65.1,showDims=true;
+let mode='orbit',cut=0,showDims=true;
 const cam={tx:330,ty:500,tz:60,yaw:-2.1,pitch:.95,dist:1500,ex:430,ey:250,ez:160,wy:Math.PI*0.75,wp:-.05,fov:55*Math.PI/180};
 function eyeDir(){if(mode==='orbit'){const cp=Math.cos(cam.pitch);const d=[cp*Math.cos(cam.yaw),cp*Math.sin(cam.yaw),Math.sin(cam.pitch)];
  return{eye:[cam.tx+d[0]*cam.dist,cam.ty+d[1]*cam.dist,cam.tz+d[2]*cam.dist],tgt:[cam.tx,cam.ty,cam.tz]}}
@@ -278,7 +262,7 @@ function project(p){const x=VP[0]*p[0]+VP[4]*p[1]+VP[8]*p[2]+VP[12],y=VP[1]*p[0]
 gl.enable(gl.DEPTH_TEST);
 const colArr=new Float32Array(48*3);COL.forEach((c,i)=>colArr.set(c,i*3));
 function bindObj(pg,ob,full){if(bindObj.pg!==pg){for(let i=0;i<8;i++)gl.disableVertexAttribArray(i);bindObj.pg=pg}for(const k in pg.a){if(!full&&k!=='aP'&&k!=='aM')continue;const loc=pg.a[k];if(loc<0)continue;gl.bindBuffer(gl.ARRAY_BUFFER,ob.b[k]);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,k==='aM'||k==='aPar'?1:3,gl.FLOAT,false,0,0)}}
-function setT(pg,s){const cutObject=OB[s.ob].fixed&&!OB[s.ob].fold;gl.uniform1f(pg.u.uCut,mode==='orbit'&&cutObject?cut:0);gl.uniform2f(pg.u.uViewSide,Math.cos(cam.yaw),Math.sin(cam.yaw));gl.uniform3f(pg.u.uT,s.x,s.y,s.z);gl.uniform3f(pg.u.uS,s.sx,s.sy,s.sz);gl.uniform1f(pg.u.uRot,s.rot*Math.PI/180)}
+function setT(pg,s){gl.uniform3f(pg.u.uT,s.x,s.y,s.z);gl.uniform3f(pg.u.uS,s.sx,s.sy,s.sz);gl.uniform1f(pg.u.uRot,s.rot*Math.PI/180)}
 let sel=-1,dirty=true;
 function draw(){const dpr=Math.min(devicePixelRatio||1,2),W=cv.clientWidth,H=cv.clientHeight;
  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
@@ -489,7 +473,7 @@ $('bExp').onclick=()=>{const ch=[];INST.forEach((s,i)=>{const ob=OB[s.ob];if(ob.
  ch.push({piece:s.label,original:ob.name,width_cm:Math.round(getV(s,'W')),depth_cm:Math.round(getV(s,'D')),height_cm:Math.round(getV(s,'H')),centre_x_cm:Math.round(s.x),centre_y_cm:Math.round(s.y),lift_cm:Math.round(s.z),rotation_deg:Math.round(s.rot),removed:s.hidden,added_copy:i>=OB.length,open_parts:ob.parts.map((p,g)=>s.po?.[g]?g:null).filter(g=>g!==null)})});
  const txt=JSON.stringify({apartment:'Д15 · МОНА 5',changes:ch},null,1);try{navigator.clipboard.writeText(txt).then(()=>toast('Промените са копирани'),()=>{})}catch(e){}
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download='MONA_D15_changes.json';a.click();if(!ch.length)toast('Все още няма промени')};
-function setMode(m){mode=m;$('mOrbit').classList.toggle('on',m==='orbit');$('mWalk').classList.toggle('on',m==='walk');$('mCut').style.display=m==='orbit'?'':'none';
+function setMode(m){mode=m;$('mOrbit').classList.toggle('on',m==='orbit');$('mWalk').classList.toggle('on',m==='walk');
  $('help').innerHTML=m==='orbit'?'W A S D местят камерата. Влачи, за да завъртиш.'
  :'W A S D или стрелки за движение. Влачи, за да се огледаш.';dirty=true}
 $('mOrbit').onclick=()=>setMode('orbit');$('mWalk').onclick=()=>{startWalk();setMode('walk')};
@@ -500,7 +484,7 @@ function placeWalker(){let tgt=[250,300];if(sel>=0)tgt=[INST[sel].x,INST[sel].y]
   if(inRoom(p[0],p[1])&&(sel<0||clearPath(p,tgt))){best=p;break}if(best)break}
  if(sel<0||!best){best=best||[250,300];if(sel<0){cam.ex=180;cam.ey=330;cam.wy=-0.6;cam.wp=-.05;return}}
  cam.ex=best[0];cam.ey=best[1];cam.wy=Math.atan2(tgt[1]-best[1],tgt[0]-best[0]);cam.wp=-.18}
-$('mCut').onclick=()=>{cut=cut?0:65.1;$('mCut').classList.toggle('on',!!cut);dirty=true};
+
 $('mDoors').onclick=()=>{const cabinets=INST.map((s,i)=>({s,i,o:OB[s.ob]})).filter(({s,o})=>!s.hidden&&!o.fixed&&!o.walkLeaf&&o.parts.length);const any=cabinets.some(({s})=>s.po&&Object.values(s.po).some(Boolean));pushUndo();cabinets.forEach(({i})=>setAllParts(i,!any));$('mDoors').textContent=any?'Отвори шкафовете':'Затвори шкафовете';fillProps()};
 $('mIds').onclick=()=>{showIds=!showIds;$('mIds').classList.toggle('on',showIds);$('legend').style.display=showIds?'block':'none';VIS=null;dirty=true};
 $('mOver').onclick=()=>{allowOverlap=!allowOverlap;$('mOver').classList.toggle('on',allowOverlap);toast(allowOverlap?'Застъпването е разрешено':'Застъпването е изключено')};
@@ -675,7 +659,7 @@ function fitApartment() {
   const aspect=cv.clientWidth/Math.max(1,cv.clientHeight);
   Object.assign(cam,{tx:470,ty:350,tz:70,yaw:-1.23,pitch:.99,dist:Math.max(1170,1340/Math.max(.35,aspect))});
   const outline=[[-24,-14],[-24,383],[66,383],[66,740],[927,740],[969,708],[969,-14]];
-  const points=outline.flatMap(([x,y])=>[[x,y,-12],[x,y,cut&&x>90&&y<719?cut:D.H]]);
+  const points=outline.flatMap(([x,y])=>[[x,y,-12],[x,y,D.H]]);
   for(const s of INST) {
     if(!s.hidden&&!OB[s.ob].fixed&&inRoom(s.x,s.y))points.push(...corners(s).flat());
   }
@@ -703,7 +687,7 @@ window.addEventListener('blur',()=>{Object.keys(keys).forEach(key=>delete keys[k
 fitApartment();
 syncFoldControl();
 
-setMode('orbit');buildVariants();buildList();buildLegend();fillProps();$('mCut').classList.toggle('on',!!cut);requestAnimationFrame(loop);
+setMode('orbit');buildVariants();buildList();buildLegend();fillProps();requestAnimationFrame(loop);
 </script><script>if(document.getElementById("gl-error").hidden){(function wireInterface() {
   const search = document.getElementById('pieceSearch');
   const items = document.getElementById('items');
@@ -810,7 +794,7 @@ setMode('orbit');buildVariants();buildList();buildLegend();fillProps();$('mCut')
     if (typeof window.d15FitView==='function') window.d15FitView();
     else document.getElementById('mOrbit').click();
   });
-  const buttons = ['mOrbit','mWalk','mIds','mOver','mCut','mDims'];
+  const buttons = ['mOrbit','mWalk','mIds','mOver','mDims'];
   function updateMode() {
     document.body.dataset.mode = mode;
     if (mode!=='walk') clearWalkKeys();

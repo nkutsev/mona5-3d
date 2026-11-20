@@ -82,7 +82,7 @@ const prefix = `<!doctype html>
 <aside id="side" aria-label="Инструменти на редактора"><header class="project-head"><div class="mark" aria-hidden="true">${icon('plan')}</div><div><div class="project-name">МОНА 5</div><h1>Апартамент Д15</h1></div></header>
 <div class="side-scroll">
 <section class="scene-controls" aria-labelledby="scene-controls-title"><h2 class="section-title" id="scene-controls-title">Управление на модела</h2>
-<div class="scene-grid"><button id="bFold" aria-pressed="false">Отвори преградата</button><button id="mDoors">Отвори шкафовете</button><button id="mCut">${icon('cut')}Срез на стените</button><button id="mDims" class="on">${icon('ruler')}Отстояния</button></div>
+<div class="scene-grid"><button id="bFold" aria-pressed="false">Отвори преградата</button><button id="mDoors">Отвори шкафовете</button><button id="mDims" class="on">${icon('ruler')}Отстояния</button></div>
 <details class="advanced"><summary>${icon('more')}Настройки на изгледа</summary><div class="settings-row"><button id="mIds">Номера и размери</button><button id="mOver">Разреши застъпване</button></div></details></section>
 <div id="variants"></div>
 <section id="props"><button class="back" id="backToObjects">${icon('back')}Към мебелите</button><h2 id="pName"></h2><div class="room" id="pRoom"></div>
@@ -225,7 +225,7 @@ function wireInterface() {
     if (typeof window.d15FitView==='function') window.d15FitView();
     else document.getElementById('mOrbit').click();
   });
-  const buttons = ['mOrbit','mWalk','mIds','mOver','mCut','mDims'];
+  const buttons = ['mOrbit','mWalk','mIds','mOver','mDims'];
   function updateMode() {
     document.body.dataset.mode = mode;
     if (mode!=='walk') clearWalkKeys();

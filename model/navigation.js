@@ -125,7 +125,7 @@ function fitApartment() {
   const aspect=cv.clientWidth/Math.max(1,cv.clientHeight);
   Object.assign(cam,{tx:470,ty:350,tz:70,yaw:-1.23,pitch:.99,dist:Math.max(1170,1340/Math.max(.35,aspect))});
   const outline=[[-24,-14],[-24,383],[66,383],[66,740],[927,740],[969,708],[969,-14]];
-  const points=outline.flatMap(([x,y])=>[[x,y,-12],[x,y,cut&&x>90&&y<719?cut:D.H]]);
+  const points=outline.flatMap(([x,y])=>[[x,y,-12],[x,y,D.H]]);
   for(const s of INST) {
     if(!s.hidden&&!OB[s.ob].fixed&&inRoom(s.x,s.y))points.push(...corners(s).flat());
   }
