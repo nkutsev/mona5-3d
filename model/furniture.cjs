@@ -107,23 +107,23 @@ module.exports = function furniture(scene, kit, reference) {
   const north = item('Северен ред кухненски шкафове', kitchen,
     [236.5, 685, 0], [233, 65, 94]);
   box(north, [0, 0, 4], [225, 57, 8], m.oak);
-  box(north, [0, 0, 49], [229, 61, 80], m.white);
-  for (const x of [-76, 0, 76]) {
+  box(north, [0, 0, 49], [229, 61, 80], m.oak);
+  for (const x of [-76, 0, 76]) for(const z of [29,65]) {
     const g=part(north,{type:'slide',vec:[0,-30,0],kind:'Чекмедже',
-      id:'КС1',w:73,h:35,c:[x,-31,68],n:[0,-1,0]});
-    box(north,[x,-31,68],[73,2,35],m.lightwood,g);
-    box(north,[x,-1,51],[69,55,2],m.oak,g);
-    box(north,[x,-32,77],[18,1.5,1.5],m.steel,g);
+      id:'КС1',w:73,h:34,c:[x,-31,z],n:[0,-1,0]});
+    box(north,[x,-31,z],[73,2,34],m.kwood,g);
+    box(north,[x,-1,z-15],[69,55,2],m.oak,g);
+    box(north,[x,-32,z+10],[18,1.5,1.5],m.steel,g);
   }
 
   const peninsula = item('Свързан кухненски полуостров', kitchen,
     [305, 577, 0], [65, 152, 94]);
   box(peninsula, [0, 0, 4], [57, 144, 8], m.oak);
-  box(peninsula, [0, 0, 49], [61, 148, 80], m.white);
+  box(peninsula, [0, 0, 49], [61, 148, 80], m.oak);
   for (const y of [-50, 0, 50]) for (const z of [29, 65]) {
     const g=part(peninsula,{type:'slide',vec:[30,0,0],kind:'Чекмедже',
       id:'КП1',w:47,h:34,c:[32,y,z],n:[1,0,0]});
-    box(peninsula,[32,y,z],[2,47,34],m.lightwood,g);
+    box(peninsula,[32,y,z],[2,47,34],m.kwood,g);
     box(peninsula,[1,y,z-15],[57,43,2],m.oak,g);
     box(peninsula,[34,y,z+10],[1.5,18,1.5],m.steel,g);
   }
