@@ -94,30 +94,41 @@ module.exports = function furniture(scene, kit, reference) {
   place('Oven tower', 'Колона с фурна', kitchen, [122.65, 461, 0], -90);
   place('Fridge', 'Хладилник с две врати', kitchen, [122.5, 401, 0], -90, [60 / 90, 61 / 74, 1]);
 
-  // The island occupies the south side of the larger kitchen; the dining set
-  // stays beyond it, with a clear route from the entrance hall on the west.
-  const island = item('Кухненски остров с чекмеджета', kitchen, [400, 445, 0], [124, 74, 94]);
-  box(island, [0, 0, 4], [110, 60, 8], m.oak);
-  for (const x of [-57, 57]) box(island, [x, 0, 46], [2, 66, 82], m.lightwood);
-  box(island, [0, 32, 46], [116, 2, 82], m.lightwood);
-  for (const z of [9, 86]) box(island, [0, 0, z], [114, 64, 2], m.lightwood);
-  for (const x of [-28.5, 28.5]) for (const [row, z] of [29, 65].entries()) {
-    const g = part(island, {type:'slide',vec:[0,-32,0],kind:'Чекмедже',
-      id:'КО1',w:55,h:34,c:[x,-34,z],n:[0,-1,0]});
-    box(island, [x,-33,z], [55,2,34], m.white, g);
-    box(island, [x,-2,z-15], [51,58,2], m.oak, g);
-    for (const side of [-24.5,24.5]) box(island, [x+side,-2,z-7], [2,58,18], m.oak, g);
-    box(island, [x,-30,z+10], [18,1.5,1.5], m.steel, g);
+  // The west run, north run and connected southward return form the U in the
+  // reference. The dining set sits east of the return, beside the glass.
+  const north = item('Северен ред кухненски шкафове', kitchen,
+    [236.5, 685, 0], [233, 65, 94]);
+  box(north, [0, 0, 4], [225, 57, 8], m.oak);
+  box(north, [0, 0, 49], [229, 61, 80], m.white);
+  box(north, [0, 0, 90], [233, 65, 4], m.travertine);
+  for (const x of [-76, 0, 76]) {
+    const g=part(north,{type:'slide',vec:[0,-30,0],kind:'Чекмедже',
+      id:'КС1',w:73,h:35,c:[x,-31,68],n:[0,-1,0]});
+    box(north,[x,-31,68],[73,2,35],m.lightwood,g);
+    box(north,[x,-1,51],[69,55,2],m.oak,g);
+    box(north,[x,-32,77],[18,1.5,1.5],m.steel,g);
   }
-  box(island, [0, 0, 90], [124,74,4], m.travertine);
 
-  place('Dining table', 'Трапезна маса', kitchen, [400, 606, 0], 0, [.84, 130 / 140, 1]);
+  const peninsula = item('Свързан кухненски полуостров', kitchen,
+    [305, 577, 0], [65, 152, 94]);
+  box(peninsula, [0, 0, 4], [57, 144, 8], m.oak);
+  box(peninsula, [0, 0, 48], [61, 148, 78], m.white);
+  for (const y of [-50, 0, 50]) for (const z of [29, 65]) {
+    const g=part(peninsula,{type:'slide',vec:[30,0,0],kind:'Чекмедже',
+      id:'КП1',w:47,h:34,c:[32,y,z],n:[1,0,0]});
+    box(peninsula,[32,y,z],[2,47,34],m.lightwood,g);
+    box(peninsula,[1,y,z-15],[57,43,2],m.oak,g);
+    box(peninsula,[34,y,z+10],[1.5,18,1.5],m.steel,g);
+  }
+  box(peninsula, [0, 0, 90], [65,152,4], m.travertine);
+
+  place('Dining table', 'Трапезна маса', kitchen, [450, 590, 0], 0, [.84, 130 / 140, 1]);
   for (const [index, x, y, rotation] of [
-    [1, 342, 575, 0], [2, 342, 637, 0], [3, 458, 575, 180], [4, 458, 637, 180]
+    [1, 392, 559, 0], [2, 392, 621, 0], [3, 508, 559, 180], [4, 508, 621, 180]
   ]) place('Dining chair 1', 'Трапезен стол ' + index, kitchen, [x, y, 0], rotation);
-  place('Bowl (dining table)', 'Купа на трапезната маса', kitchen, [400, 606, 76]);
-  for (const [i, y] of [575, 638].entries()) {
-    place('Pendant light 1', 'Пендел ' + (i + 1), kitchen, [400, y, 168], 0, [1, 1, (scene.H - 168) / 81.5]);
+  place('Bowl (dining table)', 'Купа на трапезната маса', kitchen, [450, 590, 76]);
+  for (const [i, y] of [559, 622].entries()) {
+    place('Pendant light 1', 'Пендел ' + (i + 1), kitchen, [450, y, 168], 0, [1, 1, (scene.H - 168) / 81.5]);
   }
 
   place('Sofa', 'Ъглов диван с лежанка', living, [800, 628, 0], 180, [.96, 165 / 185, 1]);
