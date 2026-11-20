@@ -32,10 +32,8 @@ module.exports = function adaptEngine(source) {
     "const cabinets=INST.map((s,i)=>({s,i,o:OB[s.ob]})).filter(({s,o})=>!s.hidden&&!o.fixed&&!o.walkLeaf&&o.parts.length);const any=cabinets.some(({s})=>s.po&&Object.values(s.po).some(Boolean));pushUndo();cabinets.forEach(({i})=>setAllParts(i,!any))");
   swap("ob.fixed?1:(G.part+1)/255","ob.fixed&&!ob.parts.length?1:(G.part+1)/255");
   swap("select(drag.hit);","select(drag.hit>=0&&OB[INST[drag.hit].ob].fixed?-1:drag.hit);");
-  swap("function setT(pg,s){gl.uniform3f", "function setT(pg,s){const cutObject=OB[s.ob].fixed&&!OB[s.ob].fold;gl.uniform1f(pg.u.uCut,mode==='orbit'&&cutObject?cut:0);gl.uniform2f(pg.u.uViewSide,Math.cos(cam.yaw),Math.sin(cam.yaw));gl.uniform3f");
-  swap("let mode='orbit',cut=0,showDims=true;","let mode='orbit',cut=65.1,showDims=true;");
-  swap("cut=cut?0:120;","cut=cut?0:65.1;");
-  swap("fillProps();requestAnimationFrame(loop);","fillProps();$('mCut').classList.toggle('on',!!cut);requestAnimationFrame(loop);");
+  swap("$('mCut').style.display=m==='orbit'?'':'none';","");
+  swap("$('mCut').onclick=()=>{cut=cut?0:120;$('mCut').classList.toggle('on',!!cut);dirty=true};","");
   swap("placeWalker();setMode('walk')","startWalk();setMode('walk')");
   swap("cam.ex+=Math.cos(cam.wy)*k;cam.ey+=Math.sin(cam.wy)*k","walkBy(Math.cos(cam.wy)*k,Math.sin(cam.wy)*k)");
   swap("const sp=170*dt;cam.ex+=(Math.cos(cam.wy)*f+Math.sin(cam.wy)*s)*sp;cam.ey+=(Math.sin(cam.wy)*f-Math.cos(cam.wy)*s)*sp;dirty=true", "const sp=170*dt/Math.hypot(f,s);walkBy((Math.cos(cam.wy)*f+Math.sin(cam.wy)*s)*sp,(Math.sin(cam.wy)*f-Math.cos(cam.wy)*s)*sp)");
@@ -51,22 +49,6 @@ module.exports = function adaptEngine(source) {
   swap("removed:s.hidden,added_copy:i>=OB.length","removed:s.hidden,added_copy:i>=OB.length,open_parts:ob.parts.map((p,g)=>s.po?.[g]?g:null).filter(g=>g!==null)");
   swap("if(ob.fixed)return;const b=baseState(ob,s.ob)","if(ob.fixed&&!ob.parts.length)return;const b=baseState(ob,s.ob)");
   swap("uniform vec3 uCol[48];","uniform sampler2D uCream;uniform sampler2D uWalnut;uniform vec3 uCol[48];");
-  // Keep the far exterior walls behind the furniture. The front shell drops to
-  // the section height. Picking uses the same cut for opaque and glazed parts.
-  const cutShader=`uniform vec2 uViewSide;
-  bool cutD15(vec3 p,float h){
-    if(h<=0.||p.z<=h)return false;
-    bool backY=(uViewSide.y<-.12 && p.y>=719.) || (uViewSide.y>.12 && p.y<=.05);
-    bool backX=(uViewSide.x>.12 && (p.x<=.05||(p.x<=90.05&&p.y>=372.))) ||
-               (uViewSide.x<-.12 && p.x>=949.);
-    return !(backX||backY);
-  }`;
-  swap("void main(){int m=int(vM+.5);",cutShader+"\nvoid main(){int m=int(vM+.5);if(cutD15(vW,uCut))discard;");
-  swap("if(uCut>0.&&vW.z>uCut&&m!=3&&m!=4&&m!=15&&m!=12)discard;","");
-  swap("varying float vz;varying float vm;", "varying vec3 pickWorld;varying float vm;");
-  swap("vz=w.z;vm=aM;","pickWorld=w;vm=aM;");
-  swap("varying float vz;varying float vm;void main()","varying vec3 pickWorld;varying float vm;"+cutShader+"\nvoid main()");
-  swap("if(uCut>0.&&vz>uCut&&m!=3&&m!=4&&m!=15&&m!=12)discard;","if(cutD15(pickWorld,uCut))discard;");
   swap("vec4(mix(vec3(.09,.075,.06),vec3(.35,.32,.29),fr*.3),.55+.25*fr)",
     "vec4(mix(vec3(.44,.64,.65),vec3(.83,.94,.96),fr),.115+.19*fr)");
   swap("if(m==3)c=herring(vO.xy,vPar);",`if(m==46||m==47){
