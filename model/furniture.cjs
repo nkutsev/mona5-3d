@@ -17,7 +17,6 @@ const frontNames = {
   'Wall door (lift inside)': 'Врата с вътрешен механизъм', 'Wardrobe drawer': 'Чекмедже на гардероба',
   'Bench drawer': 'Чекмедже на пейката', 'Glass door': 'Остъклена врата',
   'Bottle pull-out': 'Изтеглящ се шкаф за бутилки',
-  'Corner door': 'Врата на ъглов шкаф', 'Carousel': 'Ъглова въртележка',
 };
 
 const rounded = value => Math.round(value * 1000) / 1000;
@@ -77,24 +76,14 @@ module.exports = function furniture(scene, kit, reference) {
   // Keep the internals, splashback, sink cut-out and extractor aligned when
   // installing the entire cabinet run on the opposite wall.
   const base = sources.get('Base cabinets + worktop (right wall)');
-  // Stop at the north run instead of occupying its corner cabinet. Keep the
-  // oven and fridge immediately south of this run.
-  const runCentre = [124.5, 572], runScale = [-1, 160 / 267, 1];
+  const runCentre = [124.5, 604], runScale = [-1, 226 / 267, 1];
   function kitchenModule(sourceName, name) {
     const original = sources.get(sourceName);
     const anchor = [runCentre[0] - (original.anchor[0] - base.anchor[0]),
       runCentre[1] + (original.anchor[1] - base.anchor[1]) * runScale[1], original.anchor[2]];
     return place(sourceName, name, kitchen, anchor, 0, runScale);
   }
-  const westRun = kitchenModule('Base cabinets + worktop (right wall)', 'Долни кухненски шкафове с плот');
-  // Replace the reference run's two top triangles with one continuous U top.
-  const keep=[];
-  for(let t=0;t<westRun.mat.length;t++) {
-    const z=[westRun.pos[t*9+2],westRun.pos[t*9+5],westRun.pos[t*9+8]];
-    if(!(westRun.mat[t]===m.marble&&z.every(v=>Math.abs(v-92)<.01)))keep.push(t);
-  }
-  westRun.pos=keep.flatMap(t=>westRun.pos.slice(t*9,t*9+9));
-  for(const field of ['mat','par','pt'])westRun[field]=keep.map(t=>westRun[field][t]);
+  kitchenModule('Base cabinets + worktop (right wall)', 'Долни кухненски шкафове с плот');
   kitchenModule('Upper cabinets', 'Горни кухненски шкафове');
   kitchenModule('Splashback', 'Кухненски гръб');
   kitchenModule('Sink', 'Кухненска мивка');
@@ -105,91 +94,25 @@ module.exports = function furniture(scene, kit, reference) {
   place('Oven tower', 'Колона с фурна', kitchen, [122.65, 461, 0], -90);
   place('Fridge', 'Хладилник с две врати', kitchen, [122.5, 401, 0], -90, [60 / 90, 61 / 74, 1]);
 
-  // The west run, north run and connected southward return form the U in the
-  // reference. The dining set sits east of the return, beside the glass.
-  const north = item('Северен ред кухненски шкафове', kitchen,
-    [228.75, 685, 0], [217.5, 65, 94]);
-  box(north, [0, 0, 4], [209.5, 57, 8], m.oak);
-  for (const x of [-105.75, -35.5, 35.5])
-    box(north, [x, 0, 49], [2, 61, 78], m.oak);
-  for (const z of [10,87]) box(north, [-35.625, 0, z], [142.25,61,2], m.oak);
-  box(north,[-35.625,29.5,49],[142.25,2,78],m.oak);
-  box(north,[-35.625,-31,84],[142.25,2,4],m.kwood);
-  for (const [bay,x] of [-71,0].entries()) for(const [row,z] of [29,65].entries()) {
-    const kind=row===1?(bay===0?'Органайзер за прибори':'Чекмедже за чинии')
-      :(bay===0?'Чекмедже за тенджери':'Чекмедже за тигани');
-    const g=part(north,{type:'slide',vec:[0,-30,0],kind,
-      id:'КС1',w:68,h:34,c:[x,-31,z],n:[0,-1,0]});
-    box(north,[x,-31,z],[68,2,34],m.kwood,g);
-    box(north,[x,-1,z-15],[64,53,2],m.oak,g);
-    for(const side of [-31,31])box(north,[x+side,-1,z-7],[2,53,18],m.oak,g);
-    box(north,[x,25,z-7],[64,2,18],m.oak,g);
-    box(north,[x,-32,z+14],[64,.5,4],m.groove,g);
-    box(north,[x,-33,z+10],[18,1.5,1.5],m.steel,g);
-    if(row===1&&bay===0)for(const offset of [-18,-6,6,18])
-      box(north,[x+offset,-2,z-7],[1.2,43,14],m.lightwood,g);
-    if(row===1&&bay===1)for(const offset of [-19,0,19])
-      cylinder(north,[x+offset,-1,z-13],9,9,2,m.white,g,16);
-    if(row===0&&bay===1)for(const offset of [-18,18])
-      cylinder(north,[x+offset,-1,z-13],12,12,3,m.steel,g,16);
-  }
-  // Use the actual Vidol corner module, including its linked doors and rotating
-  // internal shelves. A half turn points both accessible faces into the U.
-  place('Corner unit (carousel)', 'Ъглов шкаф с въртележка Видол', kitchen,
-    [299.75,685,10.2], 180, [68/70,65/87.5,1]);
-
-  const peninsula = item('Свързан кухненски полуостров', kitchen,
-    [305, 577, 0], [65, 152, 94]);
-  box(peninsula, [0, 0, 4], [57, 144, 8], m.oak);
-  for(const y of [-73,73,-25,25])box(peninsula,[0,y,49],[61,2,78],m.oak);
-  for(const z of [10,87])box(peninsula,[0,0,z],[61,148,2],m.oak);
-  box(peninsula, [31.5, 0, 49], [2, 148, 80], m.kwood);
-  box(peninsula, [-31.5, 0, 84], [2, 148, 4], m.kwood);
-  for (const [bay,y] of [-50,0,50].entries()) for (const [row,z] of [29,65].entries()) {
-    const kind=bay===2?(row?'Поставка за препарати':'Изтеглящ се кош')
-      :bay===1?(row?'Шкаф за бутилки':'Шкаф за запаси')
-      :(row?'Органайзер за прибори':'Дълбоко чекмедже');
-    const g=part(peninsula,{type:'slide',vec:[-30,0,0],kind,
-      id:'КП1',w:47,h:34,c:[-32,y,z],n:[-1,0,0]});
-    box(peninsula,[-32,y,z],[2,47,34],m.kwood,g);
-    box(peninsula,[0,y,z-15],[54,43,2],m.oak,g);
-    for(const side of [-20.5,20.5])box(peninsula,[0,y+side,z-7],[54,2,18],m.oak,g);
-    box(peninsula,[26,y,z-7],[2,43,18],m.oak,g);
-    box(peninsula,[-33,y,z+14],[.5,43,4],m.groove,g);
-    box(peninsula,[-34,y,z+10],[1.5,18,1.5],m.steel,g);
-    if(bay===2&&row===0)for(const side of [-11,11]) {
-      box(peninsula,[0,y+side,z-7],[24,18,15],m.black,g);
-      box(peninsula,[0,y+side,z+1],[26,20,1],m.steel,g);
-    }
-    if(bay===1&&row===1)for(const side of [-12,12])
-      cylinder(peninsula,[0,y+side,z-4],5,5,17,m.olive,g,12);
-    if(bay===0&&row===1)for(const side of [-11,0,11])
-      box(peninsula,[0,y+side,z-7],[43,1.2,14],m.lightwood,g);
-  }
-  const worktop=item('Непрекъснат П-образен кухненски плот', kitchen,
-    [214.75,604.25,88],[245.5,226.5,4]);
-  box(worktop,[-90.25,-32.5,2],[65,161.5,4],m.marble);
-  box(worktop,[0,80.75,2],[245.5,65,4],m.marble);
-  box(worktop,[90.25,-27.5,2],[65,151.5,4],m.marble);
-
-  place('Dining table', 'Трапезна маса', kitchen, [450, 590, 0], 0, [.84, 130 / 140, 1]);
+  place('Dining table', 'Трапезна маса', kitchen, [311, 592, 0], 0, [.84, 130 / 140, 1]);
   for (const [index, x, y, rotation] of [
-    [1, 392, 559, 0], [2, 392, 621, 0], [3, 508, 559, 180], [4, 508, 621, 180]
+    [1, 253, 561, 0], [2, 253, 623, 0], [3, 369, 561, 180], [4, 369, 623, 180]
   ]) place('Dining chair 1', 'Трапезен стол ' + index, kitchen, [x, y, 0], rotation);
-  place('Bowl (dining table)', 'Купа на трапезната маса', kitchen, [450, 590, 76]);
-  for (const [i, y] of [559, 622].entries()) {
-    place('Pendant light 1', 'Пендел ' + (i + 1), kitchen, [450, y, 168], 0, [1, 1, (scene.H - 168) / 81.5]);
+  place('Bowl (dining table)', 'Купа на трапезната маса', kitchen, [311, 592, 76]);
+  for (const [i, y] of [561, 624].entries()) {
+    place('Pendant light 1', 'Пендел ' + (i + 1), kitchen, [311, y, 168], 0, [1, 1, (scene.H - 168) / 81.5]);
   }
 
-  place('Sofa', 'Ъглов диван с лежанка', living, [800, 628, 0], 180, [.96, 165 / 185, 1]);
-  place('Rug (living room)', 'Килим в дневната', living, [797, 553, .15], 0, [248 / 270, 172 / 270, .7]);
-  place('Coffee table', 'Холна маса от травертин', living, [767, 547, 0], 0, [.82, .82, 1]);
-  place('Vase & candle (coffee table)', 'Ваза и свещ', living, [766.5, 545.4, 38], 0, [.85, .85, .9]);
+  place('Sofa', 'Ъглов диван с лежанка', living, [659, 628, 0], 180, [.96, 165 / 185, 1]);
+  place('Rug (living room)', 'Килим в дневната', living, [656, 553, .15], 0, [248 / 270, 172 / 270, .7]);
+  place('Coffee table', 'Холна маса от травертин', living, [626, 547, 0], 0, [.82, .82, 1]);
+  place('Vase & candle (coffee table)', 'Ваза и свещ', living, [625.5, 545.4, 38], 0, [.85, .85, .9]);
+  place('TV cabinet (floating)', 'Окачен ТВ шкаф', living, [652, 394.5, 17.4], 180);
   place('TV slat wall', 'Ламели зад телевизора', living, [706, 375, 61], 180);
-  place('TV', 'Телевизор', living, [652, 377.5, 130], 180, [.82, 1, .82]);
-  place('Wall art', 'Картина над дивана', living, [791, 718.2, 112], 180);
+  place('TV', 'Телевизор', living, [652, 377.5, 98.5], 180, [.82, 1, .82]);
+  place('Wall art', 'Картина над дивана', living, [650, 718.2, 112], 180);
 
-  const desk = place('Desk (bedroom 2)', 'Работно бюро с монитор', living, [652, 430, 0], 90, [1, .85, 1]);
+  const desk = place('Desk (bedroom 2)', 'Работно бюро с монитор', living, [861, 682, 0], 90, [1, .85, 1]);
   box(desk, [12, 0, 76], [22, 30, 2], m.black);
   box(desk, [12.5, 0, 86], [4, 6, 21], m.metal);
   box(desk, [7.3, 0, 110], [.55, 65, 27.5], m.tv);
@@ -200,7 +123,7 @@ module.exports = function furniture(scene, kit, reference) {
     }
   }
   cylinder(desk, [-12, 28, 76], 4.8, 3.1, 2, m.black, -1, 12);
-  const chair = item('Работен стол', living, [652, 495, 0], [53, 54, 96], 0);
+  const chair = item('Работен стол', living, [861, 623, 0], [53, 54, 96], 0);
   cylinder(chair, [0, 0, 25], 3, 3, 35, m.metal, -1, 16);
   for (let leg = 0; leg < 5; leg++) {
     const a = Math.PI * 2 * leg / 5;
