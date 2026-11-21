@@ -71,6 +71,25 @@ module.exports = function adaptEngine(source) {
   swap("new Float32Array(48*3)","new Float32Array(52*3)");
   swap("vec4(mix(vec3(.09,.075,.06),vec3(.35,.32,.29),fr*.3),.55+.25*fr)",
     "vec4(mix(vec3(.44,.64,.65),vec3(.83,.94,.96),fr),.115+.19*fr)");
+  // Long, staggered oak boards use global apartment coordinates, so their
+  // grain and joints remain continuous through every doorway.
+  swap("vec3 colOf(int i){",`vec3 planks(vec2 xy){
+  const float width=17., boardLength=162.;
+  float lane=floor(xy.x/width), across=fract(xy.x/width);
+  float position=(xy.y+mod(lane,4.)*40.5)/boardLength;
+  float board=floor(position), along=fract(position);
+  vec2 id=vec2(lane,board);
+  float wave=nz(xy.y*.25,lane*19.+board*4.,3.);
+  float grain=.97+.035*sin(across*36.+wave*2.)+.015*sin(across*104.+wave*5.);
+  float tone=.85+.27*hsh(id)+.035*nz(xy.y*.18,across*6.+lane*13.,7.);
+  vec2 knot=vec2(.24+.52*hsh(id+vec2(11.,5.)),.16+.67*hsh(id+vec2(7.,19.)));
+  float radius=length(vec2((across-knot.x)*3.5,(along-knot.y)*7.5));
+  float figuring=1.-.16*exp(-radius*radius*7.)+.03*sin(radius*32.)*exp(-radius*3.);
+  float edge=min(min(across,1.-across)*width,min(along,1.-along)*boardLength);
+  float joint=mix(.68,1.,smoothstep(.08,.42,edge));
+  return vec3(.79,.55,.31)*tone*grain*figuring*joint;
+}
+vec3 colOf(int i){`);
   swap("if(m==3)c=herring(vO.xy,vPar);",`if(m==46||m==47){
     vec2 span=m==46?vec2(120.,60.):vec2(100.,32.);
     vec2 tile=fract(vec2(A,B)/span);
@@ -83,7 +102,7 @@ module.exports = function adaptEngine(source) {
     float line=sin(vW.x*.14+grain*.45);
     c=vec3(.55,.35,.21)*(.96+.022*line+.018*grain);
     if(m==51)c*=.86;
-  }else if(m==3)c=herring(vO.xy,vPar);`);
+  }else if(m==3)c=planks(vO.xy);`);
   swap("const P=prog(VS,FS),PK=prog(PVS,PFS),PL=prog(LVS,LFS);",`const P=prog(VS,FS),PK=prog(PVS,PFS),PL=prog(LVS,LFS);
 const tileTextures=D.tileSources.map((uri,index)=>{
   const tex=gl.createTexture();

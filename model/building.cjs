@@ -66,15 +66,15 @@ module.exports = function buildApartment(D, kit) {
     D.walkWalls.push([[x,y1],[x,y2]]);
   }
 
-  // Base, finishes and continuous floor through the door apertures.
+  // Continuous straight oak planks throughout the apartment and loggia.
   bounds(shell,-16,-14,-12,961,373,-.4,m.greige);
   bounds(shell,74,371,-12,961,696,-.4,m.greige);
   bounds(shell,74,695,-12,926,730,-.4,m.greige);
-  floorRect(0,0,114,190,m.tile);
-  floorRect(114,0,344,190,46);
+  floorRect(0,0,114,190,m.herring);
+  floorRect(114,0,344,190,m.herring);
   floorRect(0,190,344,372,m.herring);
   floorRect(344,0,814,366,m.herring);
-  floorRect(814,0,950,366,m.outtile,false);
+  floorRect(814,0,950,366,m.herring,false);
   floorRect(344,366,950,372,m.herring);
   floorRect(90,372,505,720,m.herring);
   floorRect(505,372,925,720,m.herring);
@@ -203,9 +203,7 @@ module.exports = function buildApartment(D, kit) {
     D.walkWalls.push([[120,front],[showerStart,front]],[[showerStart,0],[showerStart,front]]);
     bounds(shell,336,0,0,338,185,H,46);
     bounds(shell,120,0,0,121.2,184,H,46);
-    // Smooth large-format floor tiles with subtle, sparse joints.
-    for (const x of [175,235,295]) bounds(shell,x,.1,.025,x+.28,184,.075,m.taupe);
-    for (const y of [65,125]) bounds(shell,120,y,.025,338,y+.28,.075,m.taupe);
+    // The floor uses the same oak planks; the supplied tile stays on the walls.
     for (const z of [60,120,180,240]) {
       bounds(shell,336-0.12,.5,z,336,184,z+.25,m.taupe);
       bounds(shell,181,front+.01,z,showerStart,front+.15,z+.25,m.taupe);
