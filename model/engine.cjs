@@ -48,7 +48,9 @@ module.exports = function adaptEngine(source) {
   swap("const same=i<OB.length&&","const same=i<OB.length&&JSON.stringify(s.po||{})===JSON.stringify(b.po||{})&&!!s.open===!!b.open&&");
   swap("removed:s.hidden,added_copy:i>=OB.length","removed:s.hidden,added_copy:i>=OB.length,open_parts:ob.parts.map((p,g)=>s.po?.[g]?g:null).filter(g=>g!==null)");
   swap("if(ob.fixed)return;const b=baseState(ob,s.ob)","if(ob.fixed&&!ob.parts.length)return;const b=baseState(ob,s.ob)");
-  swap("uniform vec3 uCol[48];","uniform sampler2D uCream;uniform sampler2D uWalnut;uniform vec3 uCol[48];");
+  swap("uniform vec3 uCol[48];","uniform sampler2D uCream;uniform sampler2D uWalnut;uniform vec3 uCol[52];");
+  swap("for(int k=0;k<48;k++)","for(int k=0;k<52;k++)");
+  swap("new Float32Array(48*3)","new Float32Array(52*3)");
   swap("vec4(mix(vec3(.09,.075,.06),vec3(.35,.32,.29),fr*.3),.55+.25*fr)",
     "vec4(mix(vec3(.44,.64,.65),vec3(.83,.94,.96),fr),.115+.19*fr)");
   swap("if(m==3)c=herring(vO.xy,vPar);",`if(m==46||m==47){
@@ -58,6 +60,11 @@ module.exports = function adaptEngine(source) {
     vec3 texel=m==46?texture2D(uCream,vec2(tile.x,.254+tile.y*.486)).rgb:
                         texture2D(uWalnut,vec2(tile.x,.415+tile.y*.36)).rgb;
     c=mix(texel*.8,texel,smoothstep(.04,.23,min(edge.x,edge.y)));
+  }else if(m==50||m==51){
+    float grain=nz(vW.x*.21+vW.y*.04,vW.y*.08+vW.z*.04,5.);
+    float line=sin(vW.x*.14+grain*.45);
+    c=vec3(.55,.35,.21)*(.96+.022*line+.018*grain);
+    if(m==51)c*=.86;
   }else if(m==3)c=herring(vO.xy,vPar);`);
   swap("const P=prog(VS,FS),PK=prog(PVS,PFS),PL=prog(LVS,LFS);",`const P=prog(VS,FS),PK=prog(PVS,PFS),PL=prog(LVS,LFS);
 const tileTextures=D.tileSources.map((uri,index)=>{
