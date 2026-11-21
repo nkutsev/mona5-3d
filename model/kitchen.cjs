@@ -226,15 +226,14 @@ module.exports = function kitchen(scene, kit, place, sources) {
   Object.assign(penTop,worktopMesh);
   penTop.anchor[2]=88;penTop.size[2]=4;penTop.parts=[];penTop.grid=null;
 
-  // The dining set is south of the peninsula, along the glazed partition.
-  // Its compact 60×100 cm top seats two people on each long side while the
-  // 109 cm hall opening remains clear to the west.
-  stain(place('Dining table','Трапезна маса за четирима',room,[405,440,0],0,
+  // The dining set sits beside the peninsula, between its east side and the
+  // glazed partition. The four chairs face the long sides of the 60×100 top.
+  stain(place('Dining table','Трапезна маса за четирима',room,[405,600,0],0,
     [60/100,100/140,1]));
   for(const [index,x,y,angle] of [
-    [1,355,415,0],[2,355,465,0],[3,455,415,180],[4,455,465,180]
+    [1,355,575,0],[2,355,625,0],[3,455,575,180],[4,455,625,180]
   ]) stain(place('Dining chair 1','Трапезен стол '+index,room,[x,y,0],angle,[.77,.77,1]));
-  place('Bowl (dining table)','Купа на трапезната маса',room,[405,440,76],0,[.85,.85,.85]);
+  place('Bowl (dining table)','Купа на трапезната маса',room,[405,600,76],0,[.85,.85,.85]);
 
   for(const [i,y] of [570,620].entries()) {
     const lamp=item('Пендел над полуострова '+(i+1),room,[275,y,0],[12,12,260]);
