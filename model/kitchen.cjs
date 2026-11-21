@@ -181,18 +181,16 @@ module.exports = function kitchen(scene, kit, place, sources) {
   box(upper,[-98,-14,230],[59,2,33],wood);
   box(upper,[0,-15,214],[258,1.4,1.4],m.brass);
 
-  const pen = item('Полуостров · шкафове към кухнята',room,[383,579.5,0],[65,149,92]);
-  box(pen,[0,5,5],[65,139,10],edge);
-  box(pen,[30.8,5,49],[2.5,139,78],edge);
-  for(const y of [-63.5,4,73.5])box(pen,[0,y,49],[63,2,78],edge);
-  // D1 drawers are on the open end. A DW1-style corner door and the actual
-  // Vidol CA1 rotating trays serve the blind corner next to the rear run.
-  for(const z of [25,63]) {
-    peninsulaMechanism(pen,0,-30,z,67,36,{kind:'Чекмедже за съдове'});
-  }
-  const cornerDoor=peninsulaMechanism(pen,4,39,49,69,77,{kind:'Ъглова врата',
-    pivot:[-30,4,10],axis:[0,0,1],angle:95});
-  const carouselPoint=v=>[v[0]*.75,35+(v[1]+8.75)*.75,v[2]+10.2];
+  const pen = item('Полуостров · шкафове към кухнята',room,[383,601.5,0],[65,103,92]);
+  box(pen,[0,5,5],[65,93,10],edge);
+  box(pen,[30.8,5,49],[2.5,93,78],edge);
+  for(const y of [-40.5,-17.5,50.5])box(pen,[0,y,49],[63,2,78],edge);
+  // A narrow P1 pull-out makes the shortened preparation counter useful.
+  // The DW1-style door and CA1 trays still serve its blind corner.
+  peninsulaMechanism(pen,3,-29,49,21,78,{kind:'Изтеглящ се шкаф за бутилки'});
+  const cornerDoor=peninsulaMechanism(pen,4,17,49,69,77,{kind:'Ъглова врата',
+    pivot:[-30,-17.5,10],axis:[0,0,1],angle:95});
+  const carouselPoint=v=>[v[0]*.75,13+(v[1]+8.75)*.75,v[2]+10.2];
   const carouselVector=v=>[v[0]*.75,v[1]*.75,v[2]];
   copyMechanism(vidolCorner,2,pen,carouselPoint,carouselVector,52.5,72,
     {kind:'Въртящ се карусел',parent:cornerDoor,follow:false});
@@ -200,7 +198,7 @@ module.exports = function kitchen(scene, kit, place, sources) {
   // triangles are kept; the D1 and CA1 cabinets above remain independent.
   const originalIsland=sources.get('Island');
   const penTop=place('Island','Заоблен плот на полуострова',room,
-    [383,579,0],180,[65/64.4,148/152,1]);
+    [383,601.5,0],180,[65/64.4,103/152,1]);
   const worktopMesh={pos:[],mat:[],pt:[],par:[]};
   for(let i=0;i<penTop.mat.length;i++)if(originalIsland.mat[i]===m.marble) {
     for(let k=0;k<9;k+=3)worktopMesh.pos.push(penTop.pos[i*9+k],penTop.pos[i*9+k+1],penTop.pos[i*9+k+2]-88);
@@ -208,15 +206,19 @@ module.exports = function kitchen(scene, kit, place, sources) {
   }
   Object.assign(penTop,worktopMesh);
   penTop.anchor[2]=88;penTop.size[2]=4;penTop.parts=[];penTop.grid=null;
-  // The peninsula is a preparation counter, with an optional second hob as
-  // in the reference photograph, away from the inner corner.
-  const hob=item('Индукционен плот · полуостров',room,[383,542,92],[42,52,1]);
-  box(hob,[0,0,.55],[42,52,1.1],edge);
-  for(const y of [-11,11])for(const x of [-10,10])
-    cylinder(hob,[x,y,1.16],7.5,7.5,.14,m.metal,-1,30);
 
-  for(const [i,y] of [546,608].entries()) {
-    const lamp=item('Пендел над полуострова '+(i+1),room,[443,y,0],[12,12,260]);
+  // The dining set is south of the peninsula, along the glazed partition.
+  // Its compact 60×100 cm top seats two people on each long side while the
+  // 109 cm hall opening remains clear to the west.
+  stain(place('Dining table','Трапезна маса за четирима',room,[405,440,0],0,
+    [60/100,100/140,1]));
+  for(const [index,x,y,angle] of [
+    [1,355,415,0],[2,355,465,0],[3,455,415,180],[4,455,465,180]
+  ]) stain(place('Dining chair 1','Трапезен стол '+index,room,[x,y,0],angle,[.77,.77,1]));
+  place('Bowl (dining table)','Купа на трапезната маса',room,[405,440,76],0,[.85,.85,.85]);
+
+  for(const [i,y] of [570,620].entries()) {
+    const lamp=item('Пендел над полуострова '+(i+1),room,[383,y,0],[12,12,260]);
     cylinder(lamp,[0,0,221],.45,.45,78,edge,-1,10);
     cylinder(lamp,[0,0,179],3.5,3.5,8,edge,-1,16);
     cylinder(lamp,[0,0,172],5.2,5.2,7,m.brass,-1,20);
