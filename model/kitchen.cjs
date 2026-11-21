@@ -128,17 +128,16 @@ module.exports = function kitchen(scene, kit, place, sources) {
   const tap=place('Tap','Черен смесител · лява линия',room,[111.5,587.25,92],180);
   tap.mat.fill(edge);
 
-  // The D1 bay is removed from the rear line. Its former footprint becomes
-  // the junction with the peninsula, while the old sink bay gains drawers.
-  const rear=item('Долни шкафове · задна линия',room,[261.25,686,0],[178.5,66,92]);
-  box(rear,[0,0,5],[178.5,66,10],edge);
-  box(rear,[0,30.8,49],[178.5,2.5,78],edge);
-  for(const x of [-87.25,-44.75,24.25,87.25])box(rear,[x,0,49],[2,63,78],edge);
-  rearMechanism(rear,4,-66.75,49,43,77,'Врата на съдомиялна');
-  rearMechanism(rear,8,-9.75,29.5,66,39,'Чекмедже за чинии');
-  rearMechanism(rear,9,-9.75,68.5,66,39,'Чекмедже за тигани');
-  box(rear,[56.75,-31.4,49],[65,2,77],dark);
-  box(rear,[0,0,90],[178.5,66,4],wood);
+  // The DW1 bay is removed. The plate and pan drawers occupy its former
+  // position; the right bay is the corner joining the shifted peninsula.
+  const rear=item('Долни шкафове · задна линия',room,[239.75,686,0],[135.5,66,92]);
+  box(rear,[0,0,5],[135.5,66,10],edge);
+  box(rear,[0,30.8,49],[135.5,2.5,78],edge);
+  for(const x of [-65.75,2.25,65.75])box(rear,[x,0,49],[2,63,78],edge);
+  rearMechanism(rear,8,-31.25,29.5,66,39,'Чекмедже за чинии');
+  rearMechanism(rear,9,-31.25,68.5,66,39,'Чекмедже за тигани');
+  box(rear,[35.75,-31.4,49],[65,2,77],dark);
+  box(rear,[0,0,90],[135.5,66,4],wood);
 
   // Vidol's original corner unit has two linked doors (CD1/CD2) around a
   // square corner and the CA1 carousel behind them. Mirror that complete unit
@@ -168,20 +167,20 @@ module.exports = function kitchen(scene, kit, place, sources) {
   box(cornerBack,[0,0,29],[65,3,58],m.walnutBack);
 
   // The rear worktop runs from the square west corner to the new peninsula.
-  const back=item('Дървен кухненски гръб · задна линия',room,[253.75,716,92],[193.5,3,59]);
-  box(back,[0,0,29],[193.5,3,58],m.walnutBack);
-  box(back,[0,-2,58],[193.5,2,1.5],edge);
+  const back=item('Дървен кухненски гръб · задна линия',room,[232.25,716,92],[150.5,3,59]);
+  box(back,[0,0,29],[150.5,3,58],m.walnutBack);
+  box(back,[0,-2,58],[150.5,2,1.5],edge);
 
-  const upper=item('Горни шкафове · задна линия',room,[253.75,704,0],[193.5,28,250]);
-  box(upper,[0,12,205],[193.5,3,90],edge);
-  box(upper,[0,0,151],[193.5,28,2],edge);
-  box(upper,[0,0,249],[193.5,28,2],edge);
-  for(const x of [-95.75,-36.75,24.25,95.75])box(upper,[x,0,200],[2,27,96],edge);
+  const upper=item('Горни шкафове · задна линия',room,[232.25,704,0],[150.5,28,250]);
+  box(upper,[0,12,205],[150.5,3,90],edge);
+  box(upper,[0,0,151],[150.5,28,2],edge);
+  box(upper,[0,0,249],[150.5,28,2],edge);
+  for(const x of [-74.25,-15.25,30,74.25])box(upper,[x,0,200],[2,27,96],edge);
   // An open walnut niche, matte lower flaps, and a horizontal walnut band.
-  box(upper,[-66.75,-11.3,183],[58,2,61],m.walnutBack);
-  for(const z of [153,184,215,247])box(upper,[-66.75,-12,z],[58,26,2],wood);
-  for(const x of [-96.75,-36.75])box(upper,[x,-13,201],[2,24,92],wood);
-  for(const [x,w] of [[-5.75,60],[60.75,70]]) {
+  box(upper,[-45.25,-11.3,183],[58,2,61],m.walnutBack);
+  for(const z of [153,184,215,247])box(upper,[-45.25,-12,z],[58,26,2],wood);
+  for(const x of [-75.25,-15.25])box(upper,[x,-13,201],[2,24,92],wood);
+  for(const [x,w] of [[7.375,45.25],[52.625,45.25]]) {
     const lower=part(upper,{type:'hinge',pivot:[x,-14,213],axis:[1,0,0],angle:-95,
       kind:'Повдигаща врата',w,h:61,c:[x,-14,182],n:[0,-1,0],id:'W1'});
     box(upper,[x,-14,182],[w-1,2,60],dark,lower);
@@ -189,17 +188,26 @@ module.exports = function kitchen(scene, kit, place, sources) {
       kind:'Повдигаща врата',w,h:32,c:[x,-14,230],n:[0,-1,0],id:'W1'});
     box(upper,[x,-14,230],[w-1,2,32],wood,band);
   }
-  box(upper,[-66.75,-14,230],[59,2,33],wood);
-  box(upper,[0,-15,214],[193.5,1.4,1.4],m.brass);
+  box(upper,[-45.25,-14,230],[59,2,33],wood);
+  box(upper,[0,-15,214],[150.5,1.4,1.4],m.brass);
 
-  const pen = item('Полуостров · шкафове към кухнята',room,[318,601.5,0],[65,103,92]);
+  // A shallow walnut corner niche bridges the two upper runs. Its usable
+  // shelves stay below the west F1 flap's sweep; the dark backing closes the
+  // gap above without blocking that flap when it lifts.
+  const upperCorner=item('Отворен ъглов шкаф · горна линия',room,[142,704,0],[30,30,250]);
+  box(upperCorner,[0,14,200],[30,1.5,100],edge);
+  box(upperCorner,[0,11.7,182],[26,1.2,62],m.walnutBack);
+  for(const x of [-14,14])box(upperCorner,[x,0,182],[2,28,64],edge);
+  for(const z of [151,173,193,214])box(upperCorner,[0,0,z],[30,28,2],wood);
+
+  const pen = item('Полуостров · шкафове към кухнята',room,[275,601.5,0],[65,103,92]);
   box(pen,[0,5,5],[65,93,10],edge);
   box(pen,[30.8,5,49],[2.5,93,78],edge);
   for(const y of [-40.5,-17.5,50.5])box(pen,[0,y,49],[63,2,78],edge);
   // A narrow P1 pull-out makes the shortened preparation counter useful.
-  // The DW1-style door and CA1 trays still serve its blind corner.
+  // A matching hinged door and CA1 trays still serve its blind corner.
   peninsulaMechanism(pen,3,-29,49,21,78,{kind:'Изтеглящ се шкаф за бутилки'});
-  const cornerDoor=peninsulaMechanism(pen,4,17,49,69,77,{kind:'Ъглова врата',
+  const cornerDoor=peninsulaMechanism(pen,4,17,49,69,77,{id:'CD3',kind:'Ъглова врата',
     pivot:[-30,-17.5,10],axis:[0,0,1],angle:95});
   const carouselPoint=v=>[v[0]*.75,13+(v[1]+8.75)*.75,v[2]+10.2];
   const carouselVector=v=>[v[0]*.75,v[1]*.75,v[2]];
@@ -209,7 +217,7 @@ module.exports = function kitchen(scene, kit, place, sources) {
   // triangles are kept; the D1 and CA1 cabinets above remain independent.
   const originalIsland=sources.get('Island');
   const penTop=place('Island','Заоблен плот на полуострова',room,
-    [318,601.5,0],180,[65/64.4,103/152,1]);
+    [275,601.5,0],180,[65/64.4,103/152,1]);
   const worktopMesh={pos:[],mat:[],pt:[],par:[]};
   for(let i=0;i<penTop.mat.length;i++)if(originalIsland.mat[i]===m.marble) {
     for(let k=0;k<9;k+=3)worktopMesh.pos.push(penTop.pos[i*9+k],penTop.pos[i*9+k+1],penTop.pos[i*9+k+2]-88);
@@ -229,7 +237,7 @@ module.exports = function kitchen(scene, kit, place, sources) {
   place('Bowl (dining table)','Купа на трапезната маса',room,[405,440,76],0,[.85,.85,.85]);
 
   for(const [i,y] of [570,620].entries()) {
-    const lamp=item('Пендел над полуострова '+(i+1),room,[318,y,0],[12,12,260]);
+    const lamp=item('Пендел над полуострова '+(i+1),room,[275,y,0],[12,12,260]);
     cylinder(lamp,[0,0,221],.45,.45,78,edge,-1,10);
     cylinder(lamp,[0,0,179],3.5,3.5,8,edge,-1,16);
     cylinder(lamp,[0,0,172],5.2,5.2,7,m.brass,-1,20);
