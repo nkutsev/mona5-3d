@@ -239,6 +239,21 @@ try{const s=JSON.parse(localStorage.getItem('mona_d15_layout_v1')||'null');
   OB.forEach((o,j)=>{if(!out.some(x=>x.ob===j))out.splice(j,0,baseState(o,j))});
   const originals=OB.map((o,j)=>out.find(s=>s.ob===j&&s.label===o.name)||baseState(o,j));INST=originals.concat(out.filter(s=>s.label!==OB[s.ob].name))}}catch(e){INST=freshInst()}
 function save(){syncFoldControl();try{localStorage.setItem('mona_d15_layout_v1',JSON.stringify({v:2,inst:INST.map(s=>Object.assign({},s,{ax:OB[s.ob].anchor[0],ay:OB[s.ob].anchor[1],az:OB[s.ob].anchor[2],r0:OB[s.ob].rot0}))}))}catch(e){}}
+try {
+  const key='mona_d15_dining_between_peninsula_v1';
+  if(localStorage.getItem(key)!=='1') {
+    const dining=new Set(['Трапезна маса за четирима','Трапезен стол 1',
+      'Трапезен стол 2','Трапезен стол 3','Трапезен стол 4',
+      'Купа на трапезната маса']);
+    for(const s of INST) {
+      const ob=OB[s.ob];
+      if(dining.has(ob.name)&&s.label===ob.name)
+        Object.assign(s,baseState(ob,s.ob),{hidden:false,po:{},open:false});
+    }
+    save();
+    localStorage.setItem(key,'1');
+  }
+} catch(e) {}
 // structure walls (2D segments) for distance measurement
 const WALLSEG=D.walkWalls||[];(()=>{if(WALLSEG.length)return;const o=D.objects.find(o=>o.name==='structure'),A=o.anchor;for(let t=0;t<o.mat.length;t++){const v=o.pos.slice(t*9,t*9+9).map((x,i)=>x+A[i%3]);
  const zs=[v[2],v[5],v[8]],xs=[v[0],v[3],v[6]],ys=[v[1],v[4],v[7]];if(Math.max(...zs)-Math.min(...zs)<100)continue;

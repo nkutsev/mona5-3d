@@ -15,6 +15,24 @@ module.exports = function adaptEngine(source) {
   swap("open:false})","open:!!x.open,po:x.po&&typeof x.po==='object'?x.po:{}})");
   swap("out.sort((a,b)=>a.ob-b.ob||(a.label>b.label?1:-1));INST=out", "const originals=OB.map((o,j)=>out.find(s=>s.ob===j&&s.label===o.name)||baseState(o,j));INST=originals.concat(out.filter(s=>s.label!==OB[s.ob].name))");
   swap("function save(){try","function save(){syncFoldControl();try");
+  // Earlier kitchen drafts allowed the dining set to be hidden or moved. Reset
+  // only those six original pieces once, then preserve subsequent user edits.
+  swap("// structure walls (2D segments)",`try {
+  const key='mona_d15_dining_between_peninsula_v1';
+  if(localStorage.getItem(key)!=='1') {
+    const dining=new Set(['Трапезна маса за четирима','Трапезен стол 1',
+      'Трапезен стол 2','Трапезен стол 3','Трапезен стол 4',
+      'Купа на трапезната маса']);
+    for(const s of INST) {
+      const ob=OB[s.ob];
+      if(dining.has(ob.name)&&s.label===ob.name)
+        Object.assign(s,baseState(ob,s.ob),{hidden:false,po:{},open:false});
+    }
+    save();
+    localStorage.setItem(key,'1');
+  }
+} catch(e) {}
+// structure walls (2D segments)`);
   swap("if(g>=0){const p0=ob.parts[g];",`if(g>=0 && ob.fold){
     const pose=panelPose(ob,ob.parts[g].foldIndex,partVal(i,0));
     gl.uniform3fv(pg.u.uPv,pose.pivot);gl.uniform3f(pg.u.uAx,0,0,1);
