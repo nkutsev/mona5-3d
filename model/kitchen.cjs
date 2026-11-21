@@ -3,7 +3,7 @@
 // A connected U layout: the existing west run meets a rear run and a peninsula.
 // The front of every base cabinet faces the clear working aisle.
 module.exports = function kitchen(scene, kit, place, sources) {
-  const {item, box, cylinder, part} = kit;
+  const {item, box, cylinder, part, tri} = kit;
   const m = scene.mats, room = 'Кухня и трапезария';
   const dark = m.charcoal, edge = m.charcoalEdge, wood = m.walnutTop;
   const stain = object => {
@@ -35,27 +35,57 @@ module.exports = function kitchen(scene, kit, place, sources) {
     [122.5, 401, 0], -90, [60/90, 61/74, 1]);
   fridge.mat = fridge.mat.map(id => id===m.steel ? dark : id);
 
-  function rearDrawer(o, x, z, width, height, label) {
-    const g = part(o, {type:'slide',vec:[0,-42,0],kind:label,w:width,h:height,
-      c:[x,-31.7,z],n:[0,-1,0],id:'D1'});
-    box(o,[x,-31.7,z],[width-.7,2,height-.7],dark,g);
-    box(o,[x,-15.8,z-height/2+1.7],[width-4,29,1.8],edge,g);
-    for (const dx of [-width/2+2,width/2-2])
-      box(o,[x+dx,-16,z-4],[1.7,29,height-8],edge,g);
-    box(o,[x,-34,z+height/2-3.5],[Math.min(width-17,34),1.3,.9],m.metal,g);
+  const vidolBase = sources.get('Base cabinets + worktop (right wall)');
+  const vidolCorner = sources.get('Corner unit (carousel)');
+  // Copy the original moving mesh and its pivot, then resize it into a bay.
+  // This keeps the D1/DW1 recessed face, groove and drawer box construction.
+  function copyMechanism(source, sourcePart, target, point, vector, width, height, extra={}) {
+    const original = source.parts[sourcePart];
+    const unit = v => {
+      const q=vector(v),length=Math.hypot(...q);
+      return q.map(n=>n/length);
+    };
+    const definition={...original,c:point(original.c),w:width,h:height,...extra};
+    if(original.pivot)definition.pivot=point(original.pivot);
+    if(original.vec)definition.vec=vector(original.vec);
+    if(original.axis)definition.axis=unit(original.axis);
+    if(original.n)definition.n=unit(original.n);
+    if(extra.pivot)definition.pivot=extra.pivot;
+    if(extra.axis)definition.axis=extra.axis;
+    if(extra.parent===undefined)delete definition.parent;
+    const group=part(target,definition);
+    source.pt.forEach((owner,i)=>{
+      if(owner!==sourcePart)return;
+      const vertex=k=>point(source.pos.slice(i*9+k,i*9+k+3));
+      const material=({[m.kwood]:dark,[m.groove]:edge,[m.white]:m.walnutBack,
+        [m.cushion]:edge})[source.mat[i]] ?? source.mat[i];
+      tri(target,vertex(0),vertex(3),vertex(6),material,group,source.par[i]);
+    });
+    return group;
+  }
+  function rearMechanism(o, sourcePart, x, z, width, height, kind) {
+    const p=vidolBase.parts[sourcePart], [cx,cy,cz]=p.c;
+    const by=width/p.w,bz=height/p.h;
+    const point=v=>[x-(v[1]-cy)*by,-31.7+(v[0]-cx),z+(v[2]-cz)*bz];
+    const vector=v=>[-v[1]*by,v[0],v[2]*bz];
+    return copyMechanism(vidolBase,sourcePart,o,point,vector,width,height,{kind});
+  }
+  function peninsulaMechanism(o, sourcePart, y, z, width, height, extra={}) {
+    const p=vidolBase.parts[sourcePart], [cx,cy,cz]=p.c;
+    const by=width/p.w,bz=height/p.h;
+    const point=v=>[-31+(v[0]-cx),y+(v[1]-cy)*by,z+(v[2]-cz)*bz];
+    const vector=v=>[v[0],v[1]*by,v[2]*bz];
+    return copyMechanism(vidolBase,sourcePart,o,point,vector,width,height,extra);
   }
   const rear = item('Долни шкафове · задна линия',room,[286,686,0],[258,66,92]);
   box(rear,[0,0,5],[258,66,10],edge);
   box(rear,[0,30.8,49],[258,2.5,78],edge);
   for (const x of [-128,-68,0,65,128]) box(rear,[x,0,49],[2,63,78],edge);
   // From left to right: integrated dishwasher, sink drawers, pan drawers, corner.
-  const dish = part(rear,{type:'hinge',pivot:[-126,-32,10],axis:[0,0,1],angle:-95,
-    kind:'Врата на съдомиялна',w:59,h:77,c:[-98,-31.7,49],n:[0,-1,0],id:'D1'});
-  box(rear,[-98,-31.7,49],[58.5,2,77],dark,dish);
-  box(rear,[-98,-34,79],[27,1.4,1.3],m.metal,dish);
-  rearDrawer(rear,-34,29,66,37,'Чекмедже под мивката');
-  rearDrawer(rear,-34,67,66,37,'Чекмедже под мивката');
-  for (const z of [22,48,74]) rearDrawer(rear,32.5,z,63,25,'Чекмедже за съдове');
+  rearMechanism(rear,4,-98,49,59,77,'Врата на съдомиялна');
+  rearMechanism(rear,0,-34,29,66,37,'Чекмедже под мивката');
+  rearMechanism(rear,0,-34,67,66,37,'Чекмедже под мивката');
+  for (const z of [22,48,74]) rearMechanism(rear,0,32.5,z,63,25,'Чекмедже за съдове');
   box(rear,[96.5,-31.4,49],[62,2,77],dark);
   box(rear,[0,0,90],[258,66,4],wood);
 
@@ -93,21 +123,17 @@ module.exports = function kitchen(scene, kit, place, sources) {
   box(pen,[0,0,5],[65,149,10],edge);
   box(pen,[30.8,0,49],[2.5,149,78],edge);
   for(const y of [-73.5,-6,73.5])box(pen,[0,y,49],[63,2,78],edge);
-  // The U corner is accessed from the working aisle, with a pull-out carousel.
+  // D1 drawers are on the open end. A DW1-style corner door and the actual
+  // Vidol CA1 rotating trays serve the blind corner next to the rear run.
   for(const z of [25,63]) {
-    const g=part(pen,{type:'slide',vec:[-47,0,0],kind:'Ъглов изтеглящ се карусел',
-      w:64,h:36,c:[-31,-40,z],n:[-1,0,0],id:'CA1'});
-    box(pen,[-31,-40,z],[2,65,35],dark,g);
-    box(pen,[-2,-40,z-13],[52,58,2],wood,g);
-    box(pen,[-33,-40,z+10],[1,26,1],m.metal,g);
+    peninsulaMechanism(pen,0,-40,z,67,36,{kind:'Чекмедже за съдове'});
   }
-  for(const z of [25,63]) {
-    const g=part(pen,{type:'slide',vec:[-43,0,0],kind:'Чекмедже за съдове',
-      w:63,h:36,c:[-31,35,z],n:[-1,0,0],id:'D1'});
-    box(pen,[-31,35,z],[2,72,35],dark,g);
-    box(pen,[-12,35,z-14],[35,68,2],edge,g);
-    box(pen,[-33,35,z+10],[1,26,1],m.metal,g);
-  }
+  const cornerDoor=peninsulaMechanism(pen,4,34,49,78,77,{kind:'Ъглова врата',
+    pivot:[-30,-5,10],axis:[0,0,1],angle:95});
+  const carouselPoint=v=>[v[0]*.75,35+(v[1]+8.75)*.75,v[2]+10.2];
+  const carouselVector=v=>[v[0]*.75,v[1]*.75,v[2]];
+  copyMechanism(vidolCorner,2,pen,carouselPoint,carouselVector,52.5,72,
+    {kind:'Въртящ се карусел',parent:cornerDoor,follow:false});
   box(pen,[0,0,90],[65,149,4],wood);
   // The peninsula is a preparation counter, with an optional second hob as
   // in the reference photograph, away from the inner corner.
