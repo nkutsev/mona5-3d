@@ -13,7 +13,7 @@ module.exports = function kitchen(scene, kit, place, sources) {
   };
 
   // Preserve Vidol's opening drawers and appliance hardware on the west wall.
-  const baseAnchor = [627.5, 207.5], west = [124.5, 605], scale = [-1, 226/267, 1];
+  const baseAnchor = [627.5, 207.5], west = [124.5, 603.5], scale = [-1, 226/267, 1];
   function westModule(sourceName, name) {
     const source = sources.get(sourceName);
     const anchor = [west[0]-(source.anchor[0]-baseAnchor[0]),
@@ -21,6 +21,8 @@ module.exports = function kitchen(scene, kit, place, sources) {
     return stain(place(sourceName, name, room, anchor, 0, scale));
   }
   const westBase = westModule('Base cabinets + worktop (right wall)', 'Долни шкафове · лява линия');
+  const westEnd=615.5,westStart=west[1]-113,westLength=westEnd-westStart;
+  const westCentre=(westStart+westEnd)/2;
   // The original straight run carried on behind the rear cabinets. Trim it
   // just after DW1; the sink hardware belongs under the new rear-wall sink.
   // Clip triangles rather than squashing the drawer widths in the source run.
@@ -28,9 +30,9 @@ module.exports = function kitchen(scene, kit, place, sources) {
   for(let i=0;i<westBase.mat.length;i++) {
     if(sources.get('Base cabinets + worktop (right wall)').mat[i]===m.marble||westBase.pt[i]>=5)continue;
     let polygon=[0,3,6].map(k=>westBase.pos.slice(i*9+k,i*9+k+3));
-    const inside=v=>v[1]+westBase.anchor[1]<=617.001;
+    const inside=v=>v[1]+westBase.anchor[1]<=westEnd+.001;
     const cut=(a,b)=>{
-      const t=(617-westBase.anchor[1]-a[1])/(b[1]-a[1]);
+      const t=(westEnd-westBase.anchor[1]-a[1])/(b[1]-a[1]);
       return a.map((n,j)=>n+(b[j]-n)*t);
     };
     const before=polygon;polygon=[];
@@ -46,14 +48,14 @@ module.exports = function kitchen(scene, kit, place, sources) {
   }
   Object.assign(westBase,clipped);
   westBase.parts=westBase.parts.slice(0,5);
-  for(let i=1;i<westBase.pos.length;i+=3)westBase.pos[i]+=50;
+  for(let i=1;i<westBase.pos.length;i+=3)westBase.pos[i]+=west[1]-westCentre;
   for(const p of westBase.parts) {
-    if(p.c)p.c[1]+=50;
-    if(p.pivot)p.pivot[1]+=50;
+    if(p.c)p.c[1]+=west[1]-westCentre;
+    if(p.pivot)p.pivot[1]+=west[1]-westCentre;
   }
-  westBase.anchor[1]=555;westBase.size[1]=124;
+  westBase.anchor[1]=westCentre;westBase.size[1]=westLength;
   westBase.grid={nx:6,ny:11,lo:Array(66).fill(0),hi:Array(66).fill(92)};
-  box(westBase,[0,0,90],[65,124,4],wood);
+  box(westBase,[0,0,90],[65,westLength,4],wood);
   const westUpper = westModule('Upper cabinets', 'Горни шкафове · лява линия');
   westUpper.mat = westUpper.mat.map(id => id===m.white ? edge : id);
   const splash = westModule('Splashback', 'Дървен гръб · лява линия');
@@ -109,63 +111,47 @@ module.exports = function kitchen(scene, kit, place, sources) {
     const vector=v=>[v[0],v[1]*by,v[2]*bz];
     return copyMechanism(vidolBase,sourcePart,o,point,vector,width,height,extra);
   }
-  const rear = item('Долни шкафове · задна линия',room,[316,686,0],[198,66,92]);
-  box(rear,[0,0,5],[198,66,10],edge);
-  box(rear,[0,30.8,49],[198,2.5,78],edge);
-  for (const x of [-98,-30,35,98]) box(rear,[x,0,49],[2,63,78],edge);
+  const rear = item('Долни шкафове · задна линия',room,[293.5,686,0],[243,66,92]);
+  box(rear,[0,0,5],[243,66,10],edge);
+  box(rear,[0,30.8,49],[243,2.5,78],edge);
+  for (const x of [-120.5,-76.5,-7.5,57.5,120.5]) box(rear,[x,0,49],[2,63,78],edge);
+  rearMechanism(rear,4,-99,49,43,77,'Врата на съдомиялна');
   // U1 and its sponge tray sit beneath the actual sink, clear of the corner.
-  rearMechanism(rear,7,-64,25,66,30,'Чекмедже под мивката');
-  rearMechanism(rear,6,-64,55,66,30,'U-образно чекмедже под мивката');
-  rearMechanism(rear,5,-64,79,66,18,'Поставка за гъби');
-  for (const z of [22,48,74]) rearMechanism(rear,0,2.5,z,63,25,'Чекмедже за съдове');
-  box(rear,[66.5,-31.4,49],[62,2,77],dark);
-  box(rear,[0,0,90],[198,66,4],wood);
+  rearMechanism(rear,7,-42,25,66,30,'Чекмедже под мивката');
+  rearMechanism(rear,6,-42,55,66,30,'U-образно чекмедже под мивката');
+  rearMechanism(rear,5,-42,79,66,18,'Поставка за гъби');
+  for (const z of [22,48,74]) rearMechanism(rear,0,25,z,63,25,'Чекмедже за съдове');
+  box(rear,[89.5,-31.4,49],[62,2,77],dark);
+  box(rear,[0,0,90],[243,66,4],wood);
 
-  // A 45-degree face bridges the west and rear cabinet fronts. The carousel
-  // reaches the space behind both runs, avoiding a dead or colliding corner.
-  const corner=item('Диагонален ъглов шкаф с карусел',room,[154.5,667.5,0],[125,101,92]);
-  const nx=13,ny=11,lo=[],hi=[];
-  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++) {
-    const x=92+(i+.5)*125/nx,y=617+(j+.5)*101/ny;
-    const inside=x<=157+(Math.min(y,654)-617)*60/37;
-    lo.push(inside?0:-1);hi.push(inside?92:-1);
+  // Vidol's original corner unit has two linked doors (CD1/CD2) around a
+  // square corner and the CA1 carousel behind them. Mirror that complete unit
+  // into this L, instead of putting a diagonal front across the work aisle.
+  const corner=stain(place('Corner unit (carousel)','Ъглов шкаф · карусел Видол',room,
+    [135.2,659.25,10.2],0,[1,-1,1]));
+  for(const p of corner.parts) {
+    if(p.id==='CD1'||p.id==='CD2')p.kind='Сгъваема ъглова врата';
+    if(p.id==='CA1')p.kind='Въртящ се карусел';
   }
-  corner.grid={nx,ny,lo,hi};
-  box(corner,[-61.5,0,49],[2,101,78],edge);
-  box(corner,[0,49.5,49],[125,2,78],edge);
-  box(corner,[61.5,18.5,49],[2,64,78],edge);
-  function polygonSlab(points,lo,hi,material) {
-    const local=points.map(([x,y])=>[x-154.5,y-667.5]);
-    for(let j=1;j+1<local.length;j++) {
-      const p=(k,z)=>[...local[k],z];
-      tri(corner,p(0,hi),p(j,hi),p(j+1,hi),material);
-      tri(corner,p(0,lo),p(j+1,lo),p(j,lo),material);
-    }
-    for(let j=0;j<local.length;j++) {
-      const a=local[j],b=local[(j+1)%local.length];
-      tri(corner,[...a,lo],[...b,lo],[...b,hi],material);
-      tri(corner,[...a,lo],[...b,hi],[...a,hi],material);
-    }
+  // Two orthogonal slabs meet the straight runs. A small round nose follows
+  // the exposed end of Vidol's island top without changing the 90° cabinet.
+  const cornerTop=item('Плот с прав ъгъл и заоблен край',room,[132,666.75,88],[80,102.5,4]);
+  box(cornerTop,[-7.5,0,2],[65,102.5,4],wood);
+  box(cornerTop,[32.5,18.75,2],[15,65,4],wood);
+  const cx=25,cy=-13.75,r=8,steps=16;
+  for(let i=0;i<steps;i++) {
+    const a=-Math.PI/2+i*Math.PI/(2*steps),b=a+Math.PI/(2*steps);
+    const p=t=>[cx+r*Math.cos(t),cy+r*Math.sin(t)];
+    const u=p(a),v=p(b),c=[cx,cy];
+    tri(cornerTop,[...c,4],[...u,4],[...v,4],wood);
+    tri(cornerTop,[...c,0],[...v,0],[...u,0],wood);
+    tri(cornerTop,[...u,0],[...v,0],[...v,4],wood);
+    tri(cornerTop,[...u,0],[...v,4],[...u,4],wood);
   }
-  const cornerOutline=[[92,617],[157,617],[217,654],[217,718],[92,718]];
-  polygonSlab(cornerOutline,0,10,edge);
-  polygonSlab(cornerOutline,88,92,wood);
-  const diagPart=vidolBase.parts[4], [dcx,dcy,dcz]=diagPart.c;
-  const along=[63/73,37/73], inward=[-37/73,63/73];
-  const diagPoint=v=>[31+(v[0]-dcx)*inward[0]+(v[1]-dcy)*(73/45)*along[0],
-    -32+(v[0]-dcx)*inward[1]+(v[1]-dcy)*(73/45)*along[1],49+(v[2]-dcz)*(77/78)];
-  const diagVector=v=>[v[0]*inward[0]+v[1]*(73/45)*along[0],
-    v[0]*inward[1]+v[1]*(73/45)*along[1],v[2]*(77/78)];
-  const diagonalDoor=copyMechanism(vidolBase,4,corner,diagPoint,diagVector,73,77,
-    {kind:'Диагонална ъглова врата',pivot:[-.5,-50.5,10],axis:[0,0,1],angle:-95});
-  const cornerPoint=v=>[10.5+v[0]*.85,8.5+(v[1]+8.75)*.85,v[2]+10.2];
-  const cornerVector=v=>[v[0]*.85,v[1]*.85,v[2]];
-  copyMechanism(vidolCorner,2,corner,cornerPoint,cornerVector,59.5,72,
-    {kind:'Въртящ се карусел',parent:diagonalDoor,follow:false});
-  const cornerBack=item('Дървен гръб · диагонален ъгъл',room,[124.5,716,92],[65,3,59]);
+  const cornerBack=item('Дървен гръб · ляв ъгъл',room,[124.5,716,92],[65,3,59]);
   box(cornerBack,[0,0,29],[65,3,58],m.walnutBack);
 
-  // The rear worktop meets the diagonal corner at x=217 and the peninsula
+  // The rear worktop meets the square corner at x=172 and the peninsula
   // at y=653. The slabs share their edges without overlapping faces.
   const back = item('Дървен кухненски гръб · задна линия',room,[286,716,92],[258,3,59]);
   box(back,[0,0,29],[258,3,58],m.walnutBack);
@@ -196,21 +182,32 @@ module.exports = function kitchen(scene, kit, place, sources) {
   box(upper,[0,-15,214],[258,1.4,1.4],m.brass);
 
   const pen = item('Полуостров · шкафове към кухнята',room,[383,579.5,0],[65,149,92]);
-  box(pen,[0,0,5],[65,149,10],edge);
-  box(pen,[30.8,0,49],[2.5,149,78],edge);
-  for(const y of [-73.5,-6,73.5])box(pen,[0,y,49],[63,2,78],edge);
+  box(pen,[0,5,5],[65,139,10],edge);
+  box(pen,[30.8,5,49],[2.5,139,78],edge);
+  for(const y of [-63.5,4,73.5])box(pen,[0,y,49],[63,2,78],edge);
   // D1 drawers are on the open end. A DW1-style corner door and the actual
   // Vidol CA1 rotating trays serve the blind corner next to the rear run.
   for(const z of [25,63]) {
-    peninsulaMechanism(pen,0,-40,z,67,36,{kind:'Чекмедже за съдове'});
+    peninsulaMechanism(pen,0,-30,z,67,36,{kind:'Чекмедже за съдове'});
   }
-  const cornerDoor=peninsulaMechanism(pen,4,34,49,78,77,{kind:'Ъглова врата',
-    pivot:[-30,-5,10],axis:[0,0,1],angle:95});
+  const cornerDoor=peninsulaMechanism(pen,4,39,49,69,77,{kind:'Ъглова врата',
+    pivot:[-30,4,10],axis:[0,0,1],angle:95});
   const carouselPoint=v=>[v[0]*.75,35+(v[1]+8.75)*.75,v[2]+10.2];
   const carouselVector=v=>[v[0]*.75,v[1]*.75,v[2]];
   copyMechanism(vidolCorner,2,pen,carouselPoint,carouselVector,52.5,72,
     {kind:'Въртящ се карусел',parent:cornerDoor,follow:false});
-  box(pen,[0,0,90],[65,149,4],wood);
+  // Reuse the rounded exposed end of Vidol's island worktop. Only its top
+  // triangles are kept; the D1 and CA1 cabinets above remain independent.
+  const originalIsland=sources.get('Island');
+  const penTop=place('Island','Заоблен плот на полуострова',room,
+    [383,579,0],180,[65/64.4,148/152,1]);
+  const worktopMesh={pos:[],mat:[],pt:[],par:[]};
+  for(let i=0;i<penTop.mat.length;i++)if(originalIsland.mat[i]===m.marble) {
+    for(let k=0;k<9;k+=3)worktopMesh.pos.push(penTop.pos[i*9+k],penTop.pos[i*9+k+1],penTop.pos[i*9+k+2]-88);
+    worktopMesh.mat.push(wood);worktopMesh.pt.push(-1);worktopMesh.par.push(penTop.par[i]);
+  }
+  Object.assign(penTop,worktopMesh);
+  penTop.anchor[2]=88;penTop.size[2]=4;penTop.parts=[];penTop.grid=null;
   // The peninsula is a preparation counter, with an optional second hob as
   // in the reference photograph, away from the inner corner.
   const hob=item('Индукционен плот · полуостров',room,[383,542,92],[42,52,1]);
