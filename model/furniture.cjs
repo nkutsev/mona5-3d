@@ -73,35 +73,7 @@ module.exports = function furniture(scene, kit, reference) {
     return result;
   }
 
-  // Keep the internals, splashback, sink cut-out and extractor aligned when
-  // installing the entire cabinet run on the opposite wall.
-  const base = sources.get('Base cabinets + worktop (right wall)');
-  const runCentre = [124.5, 604], runScale = [-1, 226 / 267, 1];
-  function kitchenModule(sourceName, name) {
-    const original = sources.get(sourceName);
-    const anchor = [runCentre[0] - (original.anchor[0] - base.anchor[0]),
-      runCentre[1] + (original.anchor[1] - base.anchor[1]) * runScale[1], original.anchor[2]];
-    return place(sourceName, name, kitchen, anchor, 0, runScale);
-  }
-  kitchenModule('Base cabinets + worktop (right wall)', 'Долни кухненски шкафове с плот');
-  kitchenModule('Upper cabinets', 'Горни кухненски шкафове');
-  kitchenModule('Splashback', 'Кухненски гръб');
-  kitchenModule('Sink', 'Кухненска мивка');
-  kitchenModule('Tap', 'Смесител на мивката');
-  kitchenModule('Hob', 'Индукционен плот');
-  kitchenModule('Extractor housing', 'Шкаф за аспиратор');
-  kitchenModule('Extractor hood', 'Аспиратор');
-  place('Oven tower', 'Колона с фурна', kitchen, [122.65, 461, 0], -90);
-  place('Fridge', 'Хладилник с две врати', kitchen, [122.5, 401, 0], -90, [60 / 90, 61 / 74, 1]);
-
-  place('Dining table', 'Трапезна маса', kitchen, [311, 592, 0], 0, [.84, 130 / 140, 1]);
-  for (const [index, x, y, rotation] of [
-    [1, 253, 561, 0], [2, 253, 623, 0], [3, 369, 561, 180], [4, 369, 623, 180]
-  ]) place('Dining chair 1', 'Трапезен стол ' + index, kitchen, [x, y, 0], rotation);
-  place('Bowl (dining table)', 'Купа на трапезната маса', kitchen, [311, 592, 76]);
-  for (const [i, y] of [561, 624].entries()) {
-    place('Pendant light 1', 'Пендел ' + (i + 1), kitchen, [311, y, 168], 0, [1, 1, (scene.H - 168) / 81.5]);
-  }
+  require('./kitchen.cjs')(scene, kit, place, sources);
 
   place('Sofa', 'Ъглов диван с лежанка', living, [659, 628, 0], 180, [.96, 165 / 185, 1]);
   place('Rug (living room)', 'Килим в дневната', living, [656, 553, .15], 0, [248 / 270, 172 / 270, .7]);

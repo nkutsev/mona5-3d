@@ -14,8 +14,9 @@ const embedded=/^const D=(.+);\r?$/m;
 const reference=JSON.parse(template.match(embedded)[1]);
 const scene={
   objects:[],rooms:[],H:260,
-  mats:{...reference.mats,serena:46,tangram:47},
-  cols:[...reference.cols.slice(0,46),[.84,.80,.71],[.66,.46,.32]],
+  mats:{...reference.mats,serena:46,tangram:47,charcoal:48,charcoalEdge:49,walnutTop:50,walnutBack:51},
+  cols:[...reference.cols.slice(0,46),[.84,.80,.71],[.66,.46,.32],
+    [.11,.15,.17],[.07,.10,.12],[.52,.31,.16],[.43,.25,.13]],
   tileSources:['serena-cream','tangram-walnut'].map(n=>
     'data:image/jpeg;base64,'+read('materials/tile-'+n+'-reference.jpg',null).toString('base64'))
 };
