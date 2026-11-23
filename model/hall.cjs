@@ -1,96 +1,89 @@
 'use strict';
 
 module.exports = function hall(scene, {item, box, cylinder, tri, part}) {
-  const m = scene.mats;
-  const room = 'Антре';
-  const wood = m.kitchenVeneer, trim = m.charcoalEdge;
+  const m=scene.mats, room='Антре';
+  const oak=m.lightwood, wood=m.kitchenVeneer, face=m.beige, dark=m.charcoalEdge;
+  // The kitchen wall runs from X=0 to X=235 at Y=362.
+  const layout={mirrorEnd:54,benchEnd:157,end:235};
+  const {mirrorEnd,benchEnd,end}=layout;
+  const benchX=(mirrorEnd+benchEnd)/2;
+  const closetX=(benchEnd+end)/2;
 
-  // The hall face of the kitchen wall is at Y=362 and ends at X=235.
-  const panel = item('Дървесна облицовка с високо огледало',room,[47,360,0],[94,4,258]);
-  box(panel,[0,.7,129],[94,2.6,258],m.hallVeneer);
-  box(panel,[-21,-.9,128],[44,.8,252],trim);
-  box(panel,[-21,-1.5,128],[43,.6,251],m.mirror);
-  box(panel,[3,-1.28,133],[.75,.55,234],m.led);
-  box(panel,[44,-1.28,133],[.75,.55,234],m.led);
-  box(panel,[0,-1.3,255.8],[91,1.05,.65],m.led);
-
-  function drawer(object,x,y,z,width,depth,height,travel,id,extra={}) {
-    const g = part(object,{type:'slide',vec:[0,-travel,0],kind:'Чекмедже',id,
-      w:width,h:height,c:[x,y,z],n:[0,-1,0],...extra});
-    box(object,[x,y+.85,z],[width,1.7,height-.55],wood,g);
-    box(object,[x,y+1,z+height/2-.55],[width-1,1.9,.7],trim,g);
-    box(object,[x,y+depth/2,z-height/2+1.5],[width-3,depth-2,1.2],m.lightwood,g);
-    for(const side of [-1,1]) {
-      box(object,[x+side*(width/2-2),y+depth/2,z-1.7],[1.1,depth-2,height-4],wood,g);
-    }
-    box(object,[x,y+depth-1.25,z-1.7],[width-4,1.2,height-4],wood,g);
+  function door(object,{x,z,w,h,y,pivot,angle,id}) {
+    const group=part(object,{type:'hinge',pivot:[pivot,y,0],axis:[0,0,1],angle,
+      kind:'Врата на шкаф',id,w,h,c:[x,y,z],n:[0,-1,0]});
+    box(object,[x,y,z],[w-1,1.8,h],face,group);
+    const at=x+Math.sign(x-pivot)*(w/2-4);
+    if(h>100) box(object,[at,y-1.25,z-40],[1.15,.8,13],dark,group);
+    else cylinder(object,[at,y-1.35,z-h/2+4.5],1.05,.8,1.9,dark,group,16);
+  }
+  function drawer(object,x,y,z,w,depth,h,id) {
+    const group=part(object,{type:'slide',vec:[0,-22,0],kind:'Чекмедже за обувки',
+      id,w,h,c:[x,y,z],n:[0,-1,0]});
+    box(object,[x,y,z],[w-1,1.8,h],face,group);
+    box(object,[x,y-1.1,z+h/2-3.6],[12,1,.85],dark,group);
+    box(object,[x,y+depth/2,z-h/2+1.4],[w-4,depth-2,1.4],oak,group);
+    for(const dx of [-1,1])box(object,[x+dx*(w/2-2.4),y+depth/2,z-1.8],[1.35,depth-2,h-5],oak,group);
+    box(object,[x,y+depth-1.5,z-1.8],[w-4,1.35,h-5],oak,group);
   }
 
-  const console = item('Окачена конзола с две чекмеджета',room,[49,348.5,83],[78,23,18]);
-  for(const z of [1,17])box(console,[0,0,z],[78,23,2],wood);
-  for(const x of [-38.1,0,38.1])box(console,[x,.7,9],[1.8,21.5,14],wood);
-  box(console,[0,10.5,9],[74,2,14],wood);
-  for(const x of [-19.25,19.25])drawer(console,x,-11.5,9,37,19,14.5,16,'АК1');
-
-  const seat = item('Тапицирана пейка за обувки',room,[48,321,0],[71,34,45]);
-  box(seat,[0,0,3],[67,30,6],trim);
-  box(seat,[0,15.5,18],[70,2,25],wood);
-  for(const x of [-34.3,0,34.3])box(seat,[x,0,18],[1.4,34,25],wood);
-  for(const x of [-17.15,17.15])drawer(seat,x,-17,18,32.5,27,23,22,'АО1');
-  box(seat,[0,0,32],[71,34,4],m.boucle);
-  // Rounded padded channels along the upholstered seat.
-  for(let rib=0;rib<7;rib++) {
-    const x=(rib-3)*10;
-    const segments=24;
-    const ring=(y,rx,rz)=>Array.from({length:segments},(_,n)=>{
-      const a=n*2*Math.PI/segments;
-      return [x+rx*Math.cos(a),y,36+rz*Math.sin(a)];
-    });
-    const section=[
-      ring(-17,1.5,2.3),ring(-16,3.9,5.8),ring(-13.5,5.05,8.5),
-      ring(13.5,5.05,8.5),ring(16,3.9,5.8),ring(17,1.5,2.3)
-    ];
-    for(let k=1;k<section.length;k++)for(let n=0;n<segments;n++) {
-      const j=(n+1)%segments, a=section[k-1], b=section[k];
-      tri(seat,a[n],a[j],b[j],m.boucle);
-      tri(seat,a[n],b[j],b[n],m.boucle);
-    }
-    for(const end of [0,section.length-1]) {
-      const row=section[end];
-      for(let n=1;n<segments-1;n++)tri(seat,row[0],row[n],row[n+1],m.boucle);
-    }
+  const mirror=item('Огледало до пода · антре',room,[27,360,0],[54,5,206]);
+  box(mirror,[0,.8,103],[54,2.4,206],oak);
+  function outline(w,h,r,y,z) {
+    return [[1,1],[-1,1],[-1,-1],[1,-1]].flatMap(([sx,sz],k)=>
+      Array.from({length:9},(_,i)=>{
+        const a=(k+i/8)*Math.PI/2;
+        return [sx*(w/2-r)+r*Math.cos(a),y,z+sz*(h/2-r)+r*Math.sin(a)];
+      }));
   }
-
-  const closet = item('Вграден гардероб · антре',room,[164.5,335,0],[141,54,258]);
-  box(closet,[0,0,4],[141,54,8],trim);
-  for(const z of [9,256.5])box(closet,[0,0,z],[141,54,3],wood);
-  box(closet,[0,26,132],[141,2,246],wood);
-  for(const x of [-69.5,0,69.5])box(closet,[x,1,132],[2,52,245],wood);
-  for(const x of [-34.5,34.5])box(closet,[x,1,216],[67,48,2],wood);
-  box(closet,[-34.5,1,34],[67,48,2],wood);
-  box(closet,[-34.5,2,202],[65,1.8,1.8],m.steel);
-  for(const z of [76,112,148,184])box(closet,[34.5,1,z],[67,48,2],wood);
-  const doors=[];
-  for(const [x,hinge,angle] of [[-52,-69,-94],[-17.2,-.8,94],[17.2,.8,-94],[52,69,94]]) {
-    const front=part(closet,{type:'hinge',pivot:[hinge,-26,0],axis:[0,0,1],angle,
-      kind:'Врата на гардероба',id:'АГ1',w:34,h:246,c:[x,-27,132],n:[0,-1,0],
-      ...(x===52 ? {parent:doors[2],link:true,follow:false} : {})});
-    doors.push(front);
-    box(closet,[x,-26,132],[33.6,2,246],wood,front);
-    const pullX=x+Math.sign(x-hinge)*13;
-    box(closet,[pullX,-27,105],[.75,.24,16],trim,front);
+  for(const [w,h,r,y,z,finish] of [[46,201,4,-1.2,100.5,dark],[44,199,3.2,-1.48,100.5,m.mirror]]) {
+    const ring=outline(w,h,r,y,z);
+    for(let i=0;i<ring.length;i++)tri(mirror,[0,y,z],ring[i],ring[(i+1)%ring.length],finish);
   }
-  for(const z of [23,43,63]) {
-    drawer(closet,34.5,-23.5,z,65,42,17,33,'АЧ1',{parent:doors[2],follow:false});
+  box(mirror,[-24,-1.2,100],[.7,.65,196],m.led);
+  box(mirror,[0,-1.2,202.5],[48,.65,.65],m.led);
+
+  const bench=item('Пейка с ламели и закачалки',room,[benchX,342,0],[103,40,206]);
+  box(bench,[0,18.7,126],[103,2.4,158],dark);
+  for(let i=0;i<19;i++)box(bench,[-48.6+i*5.4,17.1,127],[4.7,2.8,156],wood);
+  for(const x of [-50.5,50.5])box(bench,[x,0,24],[2,40,48],oak);
+  box(bench,[0,0,3.25],[103,39,6.5],oak);
+  box(bench,[0,0,40.5],[103,40,2.4],oak);
+  box(bench,[0,16.75,203.7],[100,1.2,1],m.led);
+  box(bench,[0,.4,44],[99,36,5.1],m.bedroomMatte);
+  for(const x of [-37,-12.4,12.4,37]) {
+    box(bench,[x,15.05,151.5],[1.5,1.4,13],dark);
+    box(bench,[x,12.9,146],[1.5,4.1,1.7],dark);
+    box(bench,[x,10.8,148],[1.5,1.25,5.4],dark);
+  }
+  for(const x of [-25.6,25.6])drawer(bench,x,-19.8,23,49,32,31,'АО2');
+
+  const closet=item('Светъл гардероб · антре',room,[closetX,336,0],[78,52,206]);
+  box(closet,[0,24.8,104],[78,2.4,204],oak);
+  box(closet,[0,0,3.1],[78,52,6.2],oak);
+  for(const x of [-38,0,38])box(closet,[x,0,106],[1.8,52,200],oak);
+  for(const z of [7.1,43,204.7])box(closet,[0,0,z],[78,51.5,1.8],oak);
+  box(closet,[-19.1,0,179],[36,44,2],oak);
+  box(closet,[-19.1,0,170],[35,1.8,1.8],dark);
+  for(const z of [75,113,151,184])box(closet,[19.1,1,z],[36,46,1.8],oak);
+  for(const [x,pivot,angle] of [[-19.45,-38,-90],[19.45,38,90]]) {
+    door(closet,{x,z:124.6,w:37.6,h:160,y:-25.15,pivot,angle,id:'АГ2'});
+    drawer(closet,x,-25.15,24.4,37.1,43,34,'АО3');
   }
 
-  const vase = item('Керамична ваза · антре',room,[63,350,101],[14,12,39]);
-  for(const [z,rx,ry,h] of [[4,4.3,3.3,8],[9,5.1,3.8,6],[14,3.4,2.7,5],[17,2,1.7,3]]) {
-    cylinder(vase,[0,0,z],rx,ry,h,m.linen,-1,24);
+  const overhead=item('Горни шкафове · антре',room,[117.5,336,206],[235,52,52]);
+  box(overhead,[0,24.9,26],[235,2.2,52],oak);
+  for(const z of [1.05,50.95])box(overhead,[0,0,z],[235,51.5,2.1],oak);
+  const breaks=[0,54,105.5,157,196,235];
+  for(let i=0;i<breaks.length;i++) {
+    const x=Math.max(1,Math.min(234,breaks[i]))-117.5;
+    box(overhead,[x,.25,26],[2,49.5,49.6],oak);
   }
-  for(let n=0;n<7;n++) {
-    const x=(n-3)*1.8, y=Math.sin(n*1.9)*4, z=30+n%3*4;
-    tri(vase,[0,0,17],[x+.35,y,z],[x,y,z+2],m.olive);
-    tri(vase,[x*.55,y*.55,(z+17)*.5],[x,y,z-1],[x-1,y+1,z],m.walnutTop);
+  for(let i=1;i<breaks.length;i++){
+    const left=breaks[i-1]-117.5, right=breaks[i]-117.5;
+    const hingeLeft=i%2===1;
+    door(overhead,{x:(left+right)/2,z:26,w:right-left-.6,h:48.2,y:-25.15,
+      pivot:hingeLeft?left+1.4:right-1.4,angle:hingeLeft?-90:90,id:'АГ3'});
   }
+  box(overhead,[benchX-117.5,11,-.25],[100,1,.55],m.led);
 };

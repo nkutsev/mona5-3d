@@ -16,11 +16,13 @@ const scene={
   objects:[],rooms:[],H:260,
   mats:{...reference.mats,serena:46,tangram:47,charcoal:48,charcoalEdge:49,walnutTop:50,walnutBack:51,
     kitchenVeneer:52,kitchenTaupe:53,kitchenStone:54,smokedGlass:55,track:56,trackLight:57,hallVeneer:58,
-    bathStone:59,showerRelief:60},
+    bathStone:59,showerRelief:60,bedroomVeneer:61,bedroomFabric:62,bedroomMatte:63,
+    dividerSmoke:64,livingOak:65,livingRug:66,livingDrape:67,livingSheer:68},
   cols:[...reference.cols.slice(0,46),[.84,.80,.71],[.66,.46,.32],
     [.11,.15,.17],[.07,.10,.12],[.52,.31,.16],[.43,.25,.13],
     [.56,.42,.32],[.71,.66,.59],[.89,.81,.68],[.24,.20,.17],[.07,.10,.12],[1,.86,.62],[.56,.42,.32],
-    [.81,.77,.70],[.58,.47,.36]],
+    [.81,.77,.70],[.58,.47,.36],[.56,.42,.32],[.91,.86,.77],[.36,.38,.37],
+    [.22,.21,.20],[.77,.67,.55],[.80,.75,.67],[.71,.65,.57],[.96,.94,.90]],
   tileSources:['serena-cream','tangram-walnut'].map(n=>
     'data:image/jpeg;base64,'+read('materials/tile-'+n+'-reference.jpg',null).toString('base64'))
 };

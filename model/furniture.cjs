@@ -62,9 +62,9 @@ function fit(source, name, room, anchor, rot0, scale = [1, 1, 1]) {
 
 module.exports = function furniture(scene, kit, reference) {
   const sources = new Map(reference.objects.map(object => [object.name, object]));
-  const {box, cylinder, item, part, tri} = kit;
+  const {box, cylinder, item, tri} = kit;
   const m = scene.mats;
-  const kitchen = 'Кухня и трапезария', living = 'Дневна и кабинет', bedroom = 'Спалня';
+  const living = 'Дневна и кабинет';
   function place(sourceName, name, room, anchor, angle = 0, scale) {
     const source = sources.get(sourceName);
     if (!source) throw new Error('Missing furniture mesh: ' + sourceName);
@@ -75,16 +75,10 @@ module.exports = function furniture(scene, kit, reference) {
 
   require('./kitchen.cjs')(scene, kit, place, sources);
 
-  place('Sofa', 'Ъглов диван с лежанка', living, [659, 628, 0], 180, [.96, 165 / 185, 1]);
-  place('Rug (living room)', 'Килим в дневната', living, [656, 553, .15], 0, [248 / 270, 172 / 270, .7]);
-  place('Coffee table', 'Холна маса от травертин', living, [626, 547, 0], 0, [.82, .82, 1]);
-  place('Vase & candle (coffee table)', 'Ваза и свещ', living, [625.5, 545.4, 38], 0, [.85, .85, .9]);
-  place('TV cabinet (floating)', 'Окачен ТВ шкаф', living, [652, 394.5, 17.4], 180);
-  place('TV slat wall', 'Ламели зад телевизора', living, [706, 375, 61], 180);
-  place('TV', 'Телевизор', living, [652, 377.5, 98.5], 180, [.82, 1, .82]);
-  place('Wall art', 'Картина над дивана', living, [650, 718.2, 112], 180);
+  require('./living.cjs')(scene,kit,place);
 
   const desk = place('Desk (bedroom 2)', 'Работно бюро с монитор', living, [861, 682, 0], 90, [1, .85, 1]);
+  desk.mat=desk.mat.map(finish=>finish===m.oak?m.livingOak:finish);
   box(desk, [12, 0, 76], [22, 30, 2], m.black);
   box(desk, [12.5, 0, 86], [4, 6, 21], m.metal);
   box(desk, [7.3, 0, 110], [.55, 65, 27.5], m.tv);
@@ -107,37 +101,14 @@ module.exports = function furniture(scene, kit, reference) {
     tri(chair, nearA, farA, farB, m.black); tri(chair, nearA, farB, nearB, m.black);
     cylinder(chair, [direction[0] * 22, direction[1] * 22, 3.5], 3.2, 3.2, 7, m.black, -1, 12);
   }
-  cylinder(chair, [0, 0, 48], 23, 22, 8, m.olive, -1, 28);
+  cylinder(chair, [0, 0, 48], 23, 22, 8, m.livingDrape, -1, 28);
   box(chair, [0, -20, 69], [6, 4, 42], m.black);
-  box(chair, [0, -22.5, 76], [40, 7, 39], m.olive);
+  box(chair, [0, -22.5, 76], [40, 7, 39], m.livingDrape);
   for (const x of [-24, 24]) {
     box(chair, [x, 0, 52.5], [2.5, 3, 21], m.black);
     box(chair, [x, 0, 64], [4, 21, 3], m.black);
   }
 
-  place('Bed (bedroom 1)', 'Двойно легло с тапицирана табла', bedroom, [618, 110, 0], 90);
-  place('Rug (bedroom 1)', 'Килим под леглото', bedroom, [618, 134, .15], 90, [1, .93, .7]);
-  place('Wardrobe (Bedroom 1)', 'Гардероб с плъзгащи врати', bedroom, [385, 116, 0], -90, [.98, 1, 1]);
-  for (const [letter, x] of [['ляво', 500], ['дясно', 736]]) {
-    const table = item('Нощно шкафче · ' + letter, bedroom, [x, 32, 0], [44, 40, 49], 0);
-    for (const legX of [-17, 17]) for (const legY of [-14, 14]) {
-      cylinder(table, [legX, legY, 5], 2, 1.8, 10, m.oak, -1, 12);
-    }
-    buildNightstand(table);
-  }
-  function buildNightstand(table) {
-    for (const z of [10, 47.5]) box(table, [0, 0, z], [44, 40, 3], m.oak);
-    for (const x of [-20.8, 20.8]) box(table, [x, 0, 29], [2.4, 40, 37], m.oak);
-    box(table, [0, -18.8, 29], [39, 2.4, 37], m.oak);
-    for (const z of [20, 37.3]) {
-      const front = part(table, {type:'slide', vec:[0, 28, 0], kind:'Чекмедже', id:'NS1',
-        w:39, h:16.4, c:[0, 19.5, z], n:[0, 1, 0]});
-      box(table, [0, 18.8, z], [38.8, 2.4, 16.4], m.kwood, front);
-      box(table, [0, .4, z - 6.8], [36, 34.8, 1.6], m.lightwood, front);
-      box(table, [0, -16.5, z - .8], [36, 1.4, 12], m.lightwood, front);
-      for (const x of [-17.4, 17.4]) box(table, [x, 0, z - .8], [1.4, 34, 12], m.lightwood, front);
-      box(table, [0, 20.7, z + 4], [10, 1.7, 1.2], m.brass, front);
-    }
-  }
+  require('./bedroom.cjs')(scene,kit);
   require('./hall.cjs')(scene,kit);
 };

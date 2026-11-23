@@ -66,15 +66,17 @@ module.exports = function adaptEngine(source) {
   swap("const same=i<OB.length&&","const same=i<OB.length&&JSON.stringify(s.po||{})===JSON.stringify(b.po||{})&&!!s.open===!!b.open&&");
   swap("removed:s.hidden,added_copy:i>=OB.length","removed:s.hidden,added_copy:i>=OB.length,open_parts:ob.parts.map((p,g)=>s.po?.[g]?g:null).filter(g=>g!==null)");
   swap("if(ob.fixed)return;const b=baseState(ob,s.ob)","if(ob.fixed&&!ob.parts.length)return;const b=baseState(ob,s.ob)");
-  swap("uniform vec3 uCol[48];","uniform sampler2D uCream;uniform sampler2D uWalnut;uniform vec3 uCol[61];");
-  swap("for(int k=0;k<48;k++)","for(int k=0;k<61;k++)");
-  swap("new Float32Array(48*3)","new Float32Array(61*3)");
+  swap("uniform vec3 uCol[48];","uniform sampler2D uCream;uniform sampler2D uWalnut;uniform vec3 uCol[69];");
+  swap("for(int k=0;k<48;k++)","for(int k=0;k<69;k++)");
+  swap("new Float32Array(48*3)","new Float32Array(69*3)");
   swap("uHideCeil>.5&&m==2","uHideCeil>.5&&(m==2||m==56||m==57)");
   swap("if(m==30){gl_FragColor","if(m==30||m==57){gl_FragColor");
-  swap("if((m==44)!=(uPass>.5))discard;", "if((m==44||m==55)!=(uPass>.5))discard;");
-  swap("if(m==44){vec3 nn=", "if(m==44||m==55){vec3 nn=");
+  swap("if((m==44)!=(uPass>.5))discard;", "if(m==68){if(uPass<.5)discard;float fold=.5+.5*cos(vO.y*1.45);gl_FragColor=vec4(vec3(.96,.94,.90)*(.91+.09*fold),.43+.12*fold);return;}bool glass=(m==44||m==55||m==64);if(glass!=(uPass>.5))discard;");
+  swap("if(m==44){vec3 nn=", "if(glass){vec3 nn=");
   swap("vec4(mix(vec3(.09,.075,.06),vec3(.35,.32,.29),fr*.3),.55+.25*fr)",
-    "m==55?vec4(mix(vec3(.28,.23,.19),vec3(.70,.64,.55),fr),.29+.19*fr):vec4(mix(vec3(.44,.64,.65),vec3(.83,.94,.96),fr),.115+.19*fr)");
+    `m==64?vec4(mix(vec3(.16,.16,.17),vec3(.68,.67,.65),fr),.23+.18*fr):
+       m==55?vec4(mix(vec3(.28,.23,.19),vec3(.70,.64,.55),fr),.29+.19*fr):
+             vec4(mix(vec3(.44,.64,.65),vec3(.83,.94,.96),fr),.115+.19*fr)`);
   // Long, staggered oak boards use global apartment coordinates, so their
   // grain and joints remain continuous through every doorway.
   swap("vec3 colOf(int i){",`vec3 planks(vec2 xy){
@@ -113,14 +115,20 @@ vec3 colOf(int i){`);
     float line=sin(vW.x*.14+grain*.45);
     c=vec3(.55,.35,.21)*(.96+.022*line+.018*grain);
     if(m==51)c*=.86;
-  }else if(m==52||m==58){
+  }else if(m==52||m==58||m==61||m==65){
     float warp=nz(A*1.9,B*.26,7.4);
     float grain=sin(A*1.25+warp*2.)+.33*sin(A*5.8+warp*3.)+.23*sin(A*13.2+warp*3.6);
     c*=.98+.035*grain+.04*nz(A*2.,B*.43,3.);
+    if(m==65)c+=vec3(.16,.10,.037)*exp(-abs(vW.z-255.)/22.);
     if(m==58){
       float side=min(abs(vO.x-3.),abs(vO.x-44.));
       float glow=.65*exp(-side/4.)+.35*exp(-abs(vO.z-256.)/12.);
       c+=vec3(.33,.20,.064)*glow;
+    }
+    if(m==61){
+      float ceiling=exp(-abs(vO.z-256.)/25.);
+      float reading=exp(-length(vec2((vO.x+108.)*.046,(vO.z-49.)*.036)));
+      c+=vec3(.36,.21,.055)*(.92*ceiling+.50*reading);
     }
   }else if(m==54){
     vec2 p=vec2(A,B);
@@ -150,6 +158,12 @@ vec3 colOf(int i){`);
     c*=(variation+.05*stoneNoise(p*.26)+(.08*ridged+.018)*rib)
       *mix(.78,1.,smoothstep(.04,.22,join));
     c+=vec3(.17,.105,.033)*exp(-abs(B-254.)/24.);
+  }else if(m==62){
+    c*=.955+.06*stoneNoise(vec2(A,B)*5.)+.02*stoneNoise(vec2(A,B)*19.);
+  }else if(m==66){
+    c*=.84+.19*stoneNoise(vec2(A,B)*6.)+.11*stoneNoise(vec2(A,B)*17.);
+  }else if(m==67){
+    c*=.92+.12*stoneNoise(vec2(A,B)*5.);
   }else if(m==3)c=planks(vO.xy);`);
   swap("const P=prog(VS,FS),PK=prog(PVS,PFS),PL=prog(LVS,LFS);",`const P=prog(VS,FS),PK=prog(PVS,PFS),PL=prog(LVS,LFS);
 const tileTextures=D.tileSources.map((uri,index)=>{
