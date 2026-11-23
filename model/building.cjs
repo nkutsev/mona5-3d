@@ -66,12 +66,12 @@ module.exports = function buildApartment(D, kit) {
     D.walkWalls.push([[x,y1],[x,y2]]);
   }
 
-  // Continuous straight oak planks throughout the apartment and loggia.
+  // Continuous oak planks with a stone floor in the bathroom.
   bounds(shell,-16,-14,-12,961,373,-.4,m.greige);
   bounds(shell,74,371,-12,961,696,-.4,m.greige);
   bounds(shell,74,695,-12,926,730,-.4,m.greige);
   floorRect(0,0,114,190,m.herring);
-  floorRect(114,0,344,190,m.herring);
+  floorRect(114,0,344,190,m.bathStone);
   floorRect(0,190,344,372,m.herring);
   floorRect(344,0,814,366,m.herring);
   floorRect(814,0,950,366,m.herring,false);
@@ -201,58 +201,83 @@ module.exports = function buildApartment(D, kit) {
     // Looking in from the hall, the shower is at left (east on the drawing).
     // The vanity and WC share a stepped service wall; glass starts at its return.
     const front=23, showerStart=261;
-    bounds(shell,120,0,0,showerStart,front,H,46);
-    quad(shell,[120,0,65],[showerStart,0,65],[showerStart,front,65],[120,front,65],46);
+    const stone=m.bathStone, relief=m.showerRelief, black=m.charcoalEdge;
+    bounds(shell,120,0,0,showerStart,front,H,stone);
     D.walkWalls.push([[120,front],[showerStart,front]],[[showerStart,0],[showerStart,front]]);
-    bounds(shell,336,0,0,338,185,H,46);
-    bounds(shell,120,0,0,121.2,184,H,46);
-    // The floor uses the same oak planks; the supplied tile stays on the walls.
-    for (const z of [60,120,180,240]) {
-      bounds(shell,336-0.12,.5,z,336,184,z+.25,m.taupe);
-      bounds(shell,181,front+.01,z,showerStart,front+.15,z+.25,m.taupe);
-    }
-    // The shader applies the supplied Tangram tile image to these two walls.
-    bounds(shell,121.5,front+.1,0,183,front+.8,H,47);
-    bounds(shell,showerStart+1,.3,0,336,1,H,47);
+    bounds(shell,120,0,0,121.2,184,H,stone);
+    bounds(shell,336,0,0,338,185,H,stone);
+    bounds(shell,120,184.5,0,133,185,H,stone);
+    bounds(shell,218,184.5,0,338,185,H,stone);
+    bounds(shell,133,184.5,210,218,185,H,stone);
+    // Wrap the relief around both shower walls and light it from the ceiling.
+    bounds(shell,showerStart,.3,0,336,1,H,relief);
+    bounds(shell,335.6,1,0,336,164,H,relief);
+    bounds(shell,showerStart+1,1.1,254,334.8,2.7,255.2,m.led);
+    bounds(shell,334,2.7,254,335.4,163.3,255.2,m.led);
     const bath='Баня';
-    // Two working drawers, including their boxes and the inset white basin.
-    const vanity=item('Окачен шкаф с умивалник',bath,[152.5,45,39],[60,42,48]);
-    for (const x of [-29.2,29.2]) bounds(vanity,x-.8,-21,0,x+.8,21,44,m.oak);
-    bounds(vanity,-30,-21,0,30,21,1.8,m.oak);
-    bounds(vanity,-30,-21,41.3,30,21,43.5,m.oak);
-    bounds(vanity,-28.4,-21,1.8,28.4,-19.8,41.3,m.lightwood);
+    // The ribbed drawer fronts carry their brass knobs and boxes when opened.
+    const vanity=item('Окачен шкаф с умивалник',bath,[152.5,45,39],[60,46,70]);
+    for (const x of [-29.2,29.2]) bounds(vanity,x-.8,-21,0,x+.8,21,44,m.charcoal);
+    bounds(vanity,-30,-21,0,30,21,1.8,m.charcoal);
+    bounds(vanity,-30,-21,41.3,30,21,43.5,m.charcoal);
+    bounds(vanity,-29,19.5,39.95,29,21,41.3,black);
+    bounds(vanity,-28.4,-21,1.8,28.4,-19.8,41.3,m.charcoal);
     for(let n=0;n<2;n++) {
       const z=n*20+.8;
       const g=part(vanity,{type:'slide',vec:[0,30,0],kind:'Чекмедже',w:57,h:19,
-        c:[0,21,z+10],n:[0,1,0],id:'БЧ1'});
-      bounds(vanity,-28.6,19.6,z,28.6,21.3,z+19,m.kwood,g);
-      bounds(vanity,-26.7,-15,z+2.2,26.7,19.8,z+3.6,m.lightwood,g);
-      for(const x of [-26.7,25.3]) bounds(vanity,x,-15,z+3.6,x+1.4,19.7,z+13,m.oak,g);
-      bounds(vanity,-26.7,-15,z+3.6,26.7,-13.6,z+13,m.oak,g);
-      bounds(vanity,-16,21.32,z+16.8,16,22,z+17.65,m.metal,g);
-    }
-    bounds(vanity,-30,-21,43.5,30,21,46,m.white);
-    bounds(vanity,-29,-20.4,45.8,29,-12.4,47.5,m.white);
-    bounds(vanity,-29,15,45.8,29,20.4,47.5,m.white);
-    bounds(vanity,-29,-12.4,45.8,-23,15,47.5,m.white);
-    bounds(vanity,23,-12.4,45.8,29,15,47.5,m.white);
-    bounds(vanity,-23,-12,46,23,15,46.25,m.linen);
-    cylinder(vanity,[0,-4,46.26],1.5,1.5,.24,m.steel);
-    cylinder(vanity,[0,-16,53.3],1.55,1.55,13,m.steel);
-    bounds(vanity,-1.5,-16,58,1.5,-7.7,60,m.steel);
-
-    // Circular vertical mirror and warm backlit edge on the dry-zone wall.
-    const mirror=item('Кръгло огледало с осветление',bath,[152.5,24.9,109],[55,3.8,55]);
-    function diskY(object, radius, y, centreZ, material) {
-      for(let i=0;i<64;i++) {
-        const a=2*Math.PI*i/64, b=2*Math.PI*(i+1)/64;
-        tri(object,[0,y,centreZ],[radius*Math.cos(a),y,centreZ+radius*Math.sin(a)],
-          [radius*Math.cos(b),y,centreZ+radius*Math.sin(b)],material);
+        c:[0,21.8,z+10],n:[0,1,0],id:'БЧ1'});
+      bounds(vanity,-28.6,19.6,z,28.6,21,z+19,black,g);
+      for(let i=0;i<36;i++) {
+        const x=-28.2+i*1.6;
+        const ridge=[[x,20.95],[x+.26,21.55],[x+.71,21.85],[x+1.16,21.55],[x+1.42,20.95]];
+        for(let j=0;j<ridge.length-1;j++) {
+          const a=ridge[j],b=ridge[j+1];
+          quad(vanity,[...a,z],[...b,z],[...b,z+19],[...a,z+19],m.charcoal,g);
+        }
       }
+      bounds(vanity,-26.7,-15,z+2.2,26.7,19.8,z+3.6,m.greige,g);
+      for(const x of [-26.7,25.3]) bounds(vanity,x,-15,z+3.6,x+1.4,19.7,z+13,m.charcoal,g);
+      bounds(vanity,-26.7,-15,z+3.6,26.7,-13.6,z+13,m.charcoal,g);
+      bounds(vanity,-2.2,21.83,z+8,2.2,23,z+12.6,m.gold,g);
     }
-    diskY(mirror,27.5,.45,27.5,m.led);
-    diskY(mirror,26.6,.85,27.5,m.oak);
-    diskY(mirror,25.9,1.2,27.5,m.mirror);
+    bounds(vanity,-30,-21,43.5,30,21,46,m.greige);
+    // Rounded rectangular vessel with a recessed bowl and visible drain.
+    const basinProfile=[[46,16,10],[47,19,11.5],[52,22,14],[58.1,23,15],
+      [59,22.3,14.4],[57.7,21.6,13.6],[53,19.5,11.5],[48.8,14.5,8.5]];
+    const basinPoint=([z,rx,ry],i)=>{
+      const a=i*Math.PI/32, x=Math.cos(a),y=Math.sin(a);
+      return [rx*Math.sign(x)*Math.pow(Math.abs(x),.73),3+ry*Math.sign(y)*Math.pow(Math.abs(y),.73),z];
+    };
+    for(let i=0;i<64;i++) {
+      for(let j=1;j<basinProfile.length;j++) {
+        const a=basinProfile[j-1],b=basinProfile[j];
+        quad(vanity,basinPoint(a,i),basinPoint(a,i+1),basinPoint(b,i+1),basinPoint(b,i),j<4?black:m.charcoal);
+      }
+      const bottom=basinProfile[basinProfile.length-1];
+      tri(vanity,[0,3,48.8],basinPoint(bottom,i),basinPoint(bottom,i+1),black);
+    }
+    cylinder(vanity,[0,3,49.15],2.25,2.25,.6,m.metal);
+    cylinder(vanity,[0,3,49.72],1.7,1.7,.6,black);
+    bounds(vanity,-2,-18.5,46,2,-14,67,black);
+    bounds(vanity,-1.55,-16,62.4,1.55,-6,64.5,black);
+    bounds(vanity,-1.4,-17.2,67,1.4,-12,68.3,black);
+
+    const mirror=item('Издължено огледало с LED кант',bath,[152.5,25.1,108],[49,3.8,112]);
+    function capsule(radius,straight,y) {
+      return [1,-1].flatMap((side,k)=>Array.from({length:33},(_,i)=>{
+        const angle=(k+i/32)*Math.PI;
+        return [radius*Math.cos(angle),y,56+side*straight+radius*Math.sin(angle)];
+      }));
+    }
+    const rimBack=capsule(24.5,31.5,-1.7), rimFront=capsule(24.5,31.5,1.25);
+    const light=capsule(22.9,31.5,1.34), pane=capsule(22,31.5,1.45);
+    for(let i=0;i<rimFront.length;i++) {
+      const j=(i+1)%rimFront.length;
+      quad(mirror,rimBack[i],rimBack[j],rimFront[j],rimFront[i],black);
+      tri(mirror,[0,1.25,56],rimFront[i],rimFront[j],black);
+      tri(mirror,[0,1.34,56],light[i],light[j],m.led);
+      tri(mirror,[0,1.45,56],pane[i],pane[j],m.mirror);
+    }
     const wc=item('Окачена тоалетна',bath,[220,50.5,19.5],[36,54,23]);
     // The bowl tapers below the closed seat to show the wall-hung silhouette.
     const rings=[[0,9.2,13,-6],[6,13.7,21,-2],[18,17.1,26,0],[21,17.5,26.3,0]];
@@ -265,13 +290,13 @@ module.exports = function buildApartment(D, kit) {
     }
     cylinder(wc,[0,0,21.5],17.4,26.1,.9,m.greige);
     cylinder(wc,[0,0,22.35],17.5,26.2,1.1,m.white);
-    bounds(shell,209,front+.1,94,231,front+.9,108,m.steel);
+    bounds(shell,209,front+.1,94,231,front+.9,108,black);
     bounds(shell,211,front+.91,97,219.5,front+1.25,105,m.greige);
     bounds(shell,220.4,front+.91,97,228,front+1.25,105,m.greige);
-    const heater=item('Дъбов шкаф с бойлер',bath,[220,41.5,116],[65,36,137]);
-    for (const x of [-32.5,30.8]) bounds(heater,x,-18,0,x+1.7,18,137,m.oak);
-    for (const z of [0,29.5,135.3]) bounds(heater,-32.5,-18,z,32.5,18,z+1.7,m.lightwood);
-    bounds(heater,-31,-18,0,31,-16.8,137,m.oak);
+    const heater=item('Шкаф с бойлер · баня',bath,[220,41.5,116],[65,36,137]);
+    for (const x of [-32.5,30.8]) bounds(heater,x,-18,0,x+1.7,18,137,m.kitchenTaupe);
+    for (const z of [0,29.5,135.3]) bounds(heater,-32.5,-18,z,32.5,18,z+1.7,m.kitchenTaupe);
+    bounds(heater,-31,-18,0,31,-16.8,137,m.kitchenTaupe);
     cylinder(heater,[0,-1.8,83],25.2,14.4,96,m.white);
     cylinder(heater,[0,-1.8,131.2],24.7,14.1,1.8,m.linen);
     bounds(heater,-10,11.9,37,10,13.1,47,m.greige);
@@ -282,15 +307,15 @@ module.exports = function buildApartment(D, kit) {
       const pivot=side*31.6;
       const g=part(heater,{type:'hinge',pivot:[pivot,17.4,2],axis:[0,0,1],angle:-side*98,
         kind:'Врата на шкаф',w:31,h:133,id:'БВ1',c:[side*15.5,18.5,67],n:[0,1,0]});
-      bounds(heater,side<0?-31.6:.3,16.7,1.8,side<0?-.3:31.6,18.5,135.1,m.kwood,g);
-      bounds(heater,side*2.7-.4,18.5,57,side*2.7+.4,19.65,77,m.metal,g);
+      bounds(heater,side<0?-31.6:.3,16.7,1.8,side<0?-.3:31.6,18.5,135.1,m.kitchenTaupe,g);
+      bounds(heater,side*2.7-.4,18.5,57,side*2.7+.4,19.65,77,black,g);
     }
     const shower=item('Плъзгащ душ параван',bath,[showerStart,94,0],[3.6,142,207]);
     shower.isFixed=true;
     // Two slender planes overlap where the mobile half runs behind the fixed pane.
     function showerPane(x,y1,y2,g) {
       quad(shower,[x,y1,1.2],[x,y2,1.2],[x,y2,201],[x,y1,201],m.glass,g);
-      for (const y of [y1,y2-.65]) bounds(shower,x-.5,y,1.2,x+.5,y+.65,201,m.steel,g);
+      for (const y of [y1,y2-.65]) bounds(shower,x-.5,y,1.2,x+.5,y+.72,201,black,g);
     }
     showerPane(-.65,-70.9,1.9,-1);
     const sg=part(shower,{type:'slide',vec:[0,-67.4,0],kind:'Плъзгащо стъкло',w:72,h:200,
@@ -298,19 +323,31 @@ module.exports = function buildApartment(D, kit) {
     shower.walkLeaf={pivot:[.7,-1.9],end:[.7,70.9],part:sg};
     D.walkWalls.push([[showerStart-.65,23.1],[showerStart-.65,95.9]]);
     showerPane(.7,-1.9,70.9,sg);
-    bounds(shower,-1.8,-71,.1,1.8,71,1.2,m.steel);
-    bounds(shower,-1.8,-71,200.5,1.8,71,204,m.steel);
-    bounds(shower,1.4,59,95,3.5,61,112,m.steel,sg);
-    // Mixer, riser, overhead and hand showers on the recessed face.
+    bounds(shower,-1.8,-71,.1,1.8,71,1.2,black);
+    bounds(shower,-1.8,-71,200.5,1.8,71,204,black);
+    bounds(shower,1.4,59,95,3.5,61,112,black,sg);
+    // Square rain head and separate hand shower, both in matte black.
     const showerX=299;
-    cylinder(shell,[showerX,4.6,161],.95,.95,123,m.steel);
-    bounds(shell,showerX-.9,4,221,showerX+.9,27,222.8,m.steel);
-    cylinder(shell,[showerX,27,218.7],10.5,9.8,2.6,m.steel);
-    bounds(shell,showerX-11.5,3,101,showerX+11.5,7.6,104.8,m.steel);
-    cylinder(shell,[showerX+10,6.25,138],1.15,1.15,36,m.steel);
-    bounds(shell,showerX+6,5.7,155,showerX+14,9,161,m.steel);
-    bounds(shell,274,6,.15,324,8.2,.55,m.steel);
-    for(let i=0;i<12;i++) bounds(shell,276+i*3.9,6.45,.55,277+i*3.9,7.75,.63,m.metal);
+    bounds(shell,showerX-4,1,222,showerX+4,2.8,233,black);
+    bounds(shell,showerX-1.5,2.6,226,showerX+1.5,30,229,black);
+    bounds(shell,showerX-1.5,27,220,showerX+1.5,30,227,black);
+    bounds(shell,showerX-12,17,219,showerX+12,41,221.5,black);
+    for(let i=0;i<7;i++) for(let j=0;j<7;j++) {
+      cylinder(shell,[showerX-9+i*3,20+j*3,218.85],.25,.25,.32,m.steel,-1,6);
+    }
+    bounds(shell,showerX-4,1,99,showerX+4,3.6,113,black);
+    bounds(shell,showerX-2,3.5,103,showerX+2,7,110,black);
+    bounds(shell,showerX+9,2,122,showerX+12,5,144,black);
+    bounds(shell,showerX+9,4.8,137,showerX+12,7,144,black);
+    const hosePoint=t=>[showerX+10.5-10.5*t,4.6+2.5*Math.sin(Math.PI*t),
+      121-18*t-54*Math.sin(Math.PI*t)];
+    for(let i=0;i<36;i++) {
+      const a=hosePoint(i/36),b=hosePoint((i+1)/36);
+      quad(shell,[a[0]-.42,a[1],a[2]],[a[0]+.42,a[1]-.25,a[2]],
+        [b[0]+.42,b[1]-.25,b[2]],[b[0]-.42,b[1],b[2]],black);
+    }
+    bounds(shell,274,6,.15,324,8.2,.55,black);
+    for(let i=0;i<12;i++) bounds(shell,276+i*3.9,6.45,.55,277+i*3.9,7.75,.63,m.steel);
   }
 
   function buildLaundry() {

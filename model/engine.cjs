@@ -66,9 +66,9 @@ module.exports = function adaptEngine(source) {
   swap("const same=i<OB.length&&","const same=i<OB.length&&JSON.stringify(s.po||{})===JSON.stringify(b.po||{})&&!!s.open===!!b.open&&");
   swap("removed:s.hidden,added_copy:i>=OB.length","removed:s.hidden,added_copy:i>=OB.length,open_parts:ob.parts.map((p,g)=>s.po?.[g]?g:null).filter(g=>g!==null)");
   swap("if(ob.fixed)return;const b=baseState(ob,s.ob)","if(ob.fixed&&!ob.parts.length)return;const b=baseState(ob,s.ob)");
-  swap("uniform vec3 uCol[48];","uniform sampler2D uCream;uniform sampler2D uWalnut;uniform vec3 uCol[59];");
-  swap("for(int k=0;k<48;k++)","for(int k=0;k<59;k++)");
-  swap("new Float32Array(48*3)","new Float32Array(59*3)");
+  swap("uniform vec3 uCol[48];","uniform sampler2D uCream;uniform sampler2D uWalnut;uniform vec3 uCol[61];");
+  swap("for(int k=0;k<48;k++)","for(int k=0;k<61;k++)");
+  swap("new Float32Array(48*3)","new Float32Array(61*3)");
   swap("uHideCeil>.5&&m==2","uHideCeil>.5&&(m==2||m==56||m==57)");
   swap("if(m==30){gl_FragColor","if(m==30||m==57){gl_FragColor");
   swap("if((m==44)!=(uPass>.5))discard;", "if((m==44||m==55)!=(uPass>.5))discard;");
@@ -126,6 +126,30 @@ vec3 colOf(int i){`);
     vec2 p=vec2(A,B);
     c*=.93+.09*stoneNoise(p*.28)+.055*stoneNoise(p*1.8);
     if(an.z<.7)c+=vec3(.055,.032,.007)*smoothstep(0.,58.,B);
+  }else if(m==59){
+    vec2 p=vec2(A,B);
+    vec2 tile=fract(p/vec2(60.,60.));
+    vec2 edge=min(tile,1.-tile)*60.;
+    float grout=smoothstep(.05,.25,min(edge.x,edge.y));
+    vec2 cell=floor(p*.65);
+    float seed=hsh(cell);
+    vec2 offset=vec2(hsh(cell+7.),hsh(cell+19.))*.55+.225;
+    float speck=step(.87,seed)*(1.-smoothstep(.06,.27,length(fract(p*.65)-offset)));
+    c*=.93+.08*stoneNoise(p*.9)+.055*stoneNoise(p*2.6)-.22*speck;
+    c=mix(c*.82,c,grout);
+  }else if(m==60){
+    vec2 p=vec2(A,B), cell=floor(p/30.), uv=fract(p/30.);
+    vec2 q=uv-.5, edge=min(uv,1.-uv)*30.;
+    float face=abs(q.x)>abs(q.y)?(q.x>0.?0.:2.):(q.y>0.?1.:3.);
+    float spin=mod(face+floor(hsh(cell)*4.),4.);
+    vec2 grainDir=vec2(cos(spin*.7854),sin(spin*.7854));
+    float rib=sin(dot(p,grainDir)*9.);
+    float ridged=step(.30,hsh(cell+vec2(face,face+11.)));
+    float variation=.87+.17*hsh(cell+face);
+    float join=min(min(edge.x,edge.y),abs(abs(q.x)-abs(q.y))*30.);
+    c*=(variation+.05*stoneNoise(p*.26)+(.08*ridged+.018)*rib)
+      *mix(.78,1.,smoothstep(.04,.22,join));
+    c+=vec3(.17,.105,.033)*exp(-abs(B-254.)/24.);
   }else if(m==3)c=planks(vO.xy);`);
   swap("const P=prog(VS,FS),PK=prog(PVS,PFS),PL=prog(LVS,LFS);",`const P=prog(VS,FS),PK=prog(PVS,PFS),PL=prog(LVS,LFS);
 const tileTextures=D.tileSources.map((uri,index)=>{
