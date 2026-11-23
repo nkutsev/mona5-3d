@@ -15,6 +15,24 @@ module.exports = function adaptEngine(source) {
   swap("open:false})","open:!!x.open,po:x.po&&typeof x.po==='object'?x.po:{}})");
   swap("out.sort((a,b)=>a.ob-b.ob||(a.label>b.label?1:-1));INST=out", "const originals=OB.map((o,j)=>out.find(s=>s.ob===j&&s.label===o.name)||baseState(o,j));INST=originals.concat(out.filter(s=>s.label!==OB[s.ob].name))");
   swap("function save(){try","function save(){syncFoldControl();try");
+  // Earlier kitchen drafts allowed the dining set to be hidden or moved. Reset
+  // only those six original pieces once, then preserve subsequent user edits.
+  swap("// structure walls (2D segments)",`try {
+  const key='mona_d15_dining_between_peninsula_v1';
+  if(localStorage.getItem(key)!=='1') {
+    const dining=new Set(['Трапезна маса за четирима','Трапезен стол 1',
+      'Трапезен стол 2','Трапезен стол 3','Трапезен стол 4',
+      'Купа на трапезната маса']);
+    for(const s of INST) {
+      const ob=OB[s.ob];
+      if(dining.has(ob.name)&&s.label===ob.name)
+        Object.assign(s,baseState(ob,s.ob),{hidden:false,po:{},open:false});
+    }
+    save();
+    localStorage.setItem(key,'1');
+  }
+} catch(e) {}
+// structure walls (2D segments)`);
   swap("if(g>=0){const p0=ob.parts[g];",`if(g>=0 && ob.fold){
     const pose=panelPose(ob,ob.parts[g].foldIndex,partVal(i,0));
     gl.uniform3fv(pg.u.uPv,pose.pivot);gl.uniform3f(pg.u.uAx,0,0,1);
@@ -48,9 +66,43 @@ module.exports = function adaptEngine(source) {
   swap("const same=i<OB.length&&","const same=i<OB.length&&JSON.stringify(s.po||{})===JSON.stringify(b.po||{})&&!!s.open===!!b.open&&");
   swap("removed:s.hidden,added_copy:i>=OB.length","removed:s.hidden,added_copy:i>=OB.length,open_parts:ob.parts.map((p,g)=>s.po?.[g]?g:null).filter(g=>g!==null)");
   swap("if(ob.fixed)return;const b=baseState(ob,s.ob)","if(ob.fixed&&!ob.parts.length)return;const b=baseState(ob,s.ob)");
-  swap("uniform vec3 uCol[48];","uniform sampler2D uCream;uniform sampler2D uWalnut;uniform vec3 uCol[48];");
+  swap("uniform vec3 uCol[48];","uniform sampler2D uCream;uniform sampler2D uWalnut;uniform vec3 uCol[69];");
+  swap("for(int k=0;k<48;k++)","for(int k=0;k<69;k++)");
+  swap("new Float32Array(48*3)","new Float32Array(69*3)");
+  swap("uHideCeil>.5&&m==2","uHideCeil>.5&&(m==2||m==56||m==57)");
+  swap("if(m==30){gl_FragColor","if(m==30||m==57){gl_FragColor");
+  swap("if((m==44)!=(uPass>.5))discard;", "if(m==68){if(uPass<.5)discard;float fold=.5+.5*cos(vO.y*1.45);gl_FragColor=vec4(vec3(.96,.94,.90)*(.91+.09*fold),.43+.12*fold);return;}bool glass=(m==44||m==55||m==64);if(glass!=(uPass>.5))discard;");
+  swap("if(m==44){vec3 nn=", "if(glass){vec3 nn=");
   swap("vec4(mix(vec3(.09,.075,.06),vec3(.35,.32,.29),fr*.3),.55+.25*fr)",
-    "vec4(mix(vec3(.44,.64,.65),vec3(.83,.94,.96),fr),.115+.19*fr)");
+    `m==64?vec4(mix(vec3(.16,.16,.17),vec3(.68,.67,.65),fr),.23+.18*fr):
+       m==55?vec4(mix(vec3(.28,.23,.19),vec3(.70,.64,.55),fr),.29+.19*fr):
+             vec4(mix(vec3(.44,.64,.65),vec3(.83,.94,.96),fr),.115+.19*fr)`);
+  // Long, staggered oak boards use global apartment coordinates, so their
+  // grain and joints remain continuous through every doorway.
+  swap("vec3 colOf(int i){",`vec3 planks(vec2 xy){
+  const float width=17., boardLength=162.;
+  float lane=floor(xy.x/width), across=fract(xy.x/width);
+  float position=(xy.y+mod(lane,4.)*40.5)/boardLength;
+  float board=floor(position), along=fract(position);
+  vec2 id=vec2(lane,board);
+  float wave=nz(xy.y*.25,lane*19.+board*4.,3.);
+  float grain=.97+.035*sin(across*36.+wave*2.)+.015*sin(across*104.+wave*5.);
+  float tone=.85+.27*hsh(id)+.035*nz(xy.y*.18,across*6.+lane*13.,7.);
+  vec2 knot=vec2(.24+.52*hsh(id+vec2(11.,5.)),.16+.67*hsh(id+vec2(7.,19.)));
+  float radius=length(vec2((across-knot.x)*3.5,(along-knot.y)*7.5));
+  float figuring=1.-.16*exp(-radius*radius*7.)+.03*sin(radius*32.)*exp(-radius*3.);
+  float edge=min(min(across,1.-across)*width,min(along,1.-along)*boardLength);
+  float joint=mix(.68,1.,smoothstep(.08,.42,edge));
+  return vec3(.79,.55,.31)*tone*grain*figuring*joint;
+}
+float stoneNoise(vec2 p){
+  vec2 cell=floor(p), t=fract(p);
+  t=t*t*(3.-2.*t);
+  float a=mix(hsh(cell),hsh(cell+vec2(1.,0.)),t.x);
+  float b=mix(hsh(cell+vec2(0.,1.)),hsh(cell+vec2(1.,1.)),t.x);
+  return mix(a,b,t.y);
+}
+vec3 colOf(int i){`);
   swap("if(m==3)c=herring(vO.xy,vPar);",`if(m==46||m==47){
     vec2 span=m==46?vec2(120.,60.):vec2(100.,32.);
     vec2 tile=fract(vec2(A,B)/span);
@@ -58,7 +110,61 @@ module.exports = function adaptEngine(source) {
     vec3 texel=m==46?texture2D(uCream,vec2(tile.x,.254+tile.y*.486)).rgb:
                         texture2D(uWalnut,vec2(tile.x,.415+tile.y*.36)).rgb;
     c=mix(texel*.8,texel,smoothstep(.04,.23,min(edge.x,edge.y)));
-  }else if(m==3)c=herring(vO.xy,vPar);`);
+  }else if(m==50||m==51){
+    float grain=nz(vW.x*.21+vW.y*.04,vW.y*.08+vW.z*.04,5.);
+    float line=sin(vW.x*.14+grain*.45);
+    c=vec3(.55,.35,.21)*(.96+.022*line+.018*grain);
+    if(m==51)c*=.86;
+  }else if(m==52||m==58||m==61||m==65){
+    float warp=nz(A*1.9,B*.26,7.4);
+    float grain=sin(A*1.25+warp*2.)+.33*sin(A*5.8+warp*3.)+.23*sin(A*13.2+warp*3.6);
+    c*=.98+.035*grain+.04*nz(A*2.,B*.43,3.);
+    if(m==65)c+=vec3(.16,.10,.037)*exp(-abs(vW.z-255.)/22.);
+    if(m==58){
+      float side=min(abs(vO.x-3.),abs(vO.x-44.));
+      float glow=.65*exp(-side/4.)+.35*exp(-abs(vO.z-256.)/12.);
+      c+=vec3(.33,.20,.064)*glow;
+    }
+    if(m==61){
+      float ceiling=exp(-abs(vO.z-256.)/25.);
+      float reading=exp(-length(vec2((vO.x+108.)*.046,(vO.z-49.)*.036)));
+      c+=vec3(.36,.21,.055)*(.92*ceiling+.50*reading);
+    }
+  }else if(m==54){
+    vec2 p=vec2(A,B);
+    c*=.93+.09*stoneNoise(p*.28)+.055*stoneNoise(p*1.8);
+    if(an.z<.7)c+=vec3(.055,.032,.007)*smoothstep(0.,58.,B);
+  }else if(m==59){
+    vec2 p=vec2(A,B);
+    vec2 tile=fract(p/vec2(60.,60.));
+    vec2 edge=min(tile,1.-tile)*60.;
+    float grout=smoothstep(.05,.25,min(edge.x,edge.y));
+    vec2 cell=floor(p*.65);
+    float seed=hsh(cell);
+    vec2 offset=vec2(hsh(cell+7.),hsh(cell+19.))*.55+.225;
+    float speck=step(.87,seed)*(1.-smoothstep(.06,.27,length(fract(p*.65)-offset)));
+    c*=.93+.08*stoneNoise(p*.9)+.055*stoneNoise(p*2.6)-.22*speck;
+    c=mix(c*.82,c,grout);
+  }else if(m==60){
+    vec2 p=vec2(A,B), cell=floor(p/30.), uv=fract(p/30.);
+    vec2 q=uv-.5, edge=min(uv,1.-uv)*30.;
+    float face=abs(q.x)>abs(q.y)?(q.x>0.?0.:2.):(q.y>0.?1.:3.);
+    float spin=mod(face+floor(hsh(cell)*4.),4.);
+    vec2 grainDir=vec2(cos(spin*.7854),sin(spin*.7854));
+    float rib=sin(dot(p,grainDir)*9.);
+    float ridged=step(.30,hsh(cell+vec2(face,face+11.)));
+    float variation=.87+.17*hsh(cell+face);
+    float join=min(min(edge.x,edge.y),abs(abs(q.x)-abs(q.y))*30.);
+    c*=(variation+.05*stoneNoise(p*.26)+(.08*ridged+.018)*rib)
+      *mix(.78,1.,smoothstep(.04,.22,join));
+    c+=vec3(.17,.105,.033)*exp(-abs(B-254.)/24.);
+  }else if(m==62){
+    c*=.955+.06*stoneNoise(vec2(A,B)*5.)+.02*stoneNoise(vec2(A,B)*19.);
+  }else if(m==66){
+    c*=.84+.19*stoneNoise(vec2(A,B)*6.)+.11*stoneNoise(vec2(A,B)*17.);
+  }else if(m==67){
+    c*=.92+.12*stoneNoise(vec2(A,B)*5.);
+  }else if(m==3)c=planks(vO.xy);`);
   swap("const P=prog(VS,FS),PK=prog(PVS,PFS),PL=prog(LVS,LFS);",`const P=prog(VS,FS),PK=prog(PVS,PFS),PL=prog(LVS,LFS);
 const tileTextures=D.tileSources.map((uri,index)=>{
   const tex=gl.createTexture();
