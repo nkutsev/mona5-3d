@@ -66,9 +66,9 @@ module.exports = function adaptEngine(source) {
   swap("const same=i<OB.length&&","const same=i<OB.length&&JSON.stringify(s.po||{})===JSON.stringify(b.po||{})&&!!s.open===!!b.open&&");
   swap("removed:s.hidden,added_copy:i>=OB.length","removed:s.hidden,added_copy:i>=OB.length,open_parts:ob.parts.map((p,g)=>s.po?.[g]?g:null).filter(g=>g!==null)");
   swap("if(ob.fixed)return;const b=baseState(ob,s.ob)","if(ob.fixed&&!ob.parts.length)return;const b=baseState(ob,s.ob)");
-  swap("uniform vec3 uCol[48];","uniform sampler2D uCream;uniform sampler2D uWalnut;uniform vec3 uCol[58];");
-  swap("for(int k=0;k<48;k++)","for(int k=0;k<58;k++)");
-  swap("new Float32Array(48*3)","new Float32Array(58*3)");
+  swap("uniform vec3 uCol[48];","uniform sampler2D uCream;uniform sampler2D uWalnut;uniform vec3 uCol[59];");
+  swap("for(int k=0;k<48;k++)","for(int k=0;k<59;k++)");
+  swap("new Float32Array(48*3)","new Float32Array(59*3)");
   swap("uHideCeil>.5&&m==2","uHideCeil>.5&&(m==2||m==56||m==57)");
   swap("if(m==30){gl_FragColor","if(m==30||m==57){gl_FragColor");
   swap("if((m==44)!=(uPass>.5))discard;", "if((m==44||m==55)!=(uPass>.5))discard;");
@@ -113,10 +113,15 @@ vec3 colOf(int i){`);
     float line=sin(vW.x*.14+grain*.45);
     c=vec3(.55,.35,.21)*(.96+.022*line+.018*grain);
     if(m==51)c*=.86;
-  }else if(m==52){
+  }else if(m==52||m==58){
     float warp=nz(A*1.9,B*.26,7.4);
     float grain=sin(A*1.25+warp*2.)+.33*sin(A*5.8+warp*3.)+.23*sin(A*13.2+warp*3.6);
     c*=.98+.035*grain+.04*nz(A*2.,B*.43,3.);
+    if(m==58){
+      float side=min(abs(vO.x-3.),abs(vO.x-44.));
+      float glow=.65*exp(-side/4.)+.35*exp(-abs(vO.z-256.)/12.);
+      c+=vec3(.33,.20,.064)*glow;
+    }
   }else if(m==54){
     vec2 p=vec2(A,B);
     c*=.93+.09*stoneNoise(p*.28)+.055*stoneNoise(p*1.8);

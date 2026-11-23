@@ -165,10 +165,13 @@ module.exports = function buildApartment(D, kit) {
     }
   }
   // Hall entrance, viewed from inside.
-  bounds(shell,-.1,220,0,1.9,320,210,m.walnut);
-  for (const y of [218,320]) bounds(shell,1.9,y,0,4.6,y+2.5,214,m.oak);
-  bounds(shell,1.9,218,210,4.6,322.5,214,m.oak);
-  bounds(shell,2,230,95,7.2,245,98,m.metal);
+  bounds(shell,-.1,220,0,1.9,320,210,m.white);
+  for (const y of [218,320]) bounds(shell,1.9,y,0,4.6,y+2.5,214,m.charcoalEdge);
+  bounds(shell,1.9,218,210,4.6,322.5,214,m.charcoalEdge);
+  bounds(shell,2,230,95,7.2,245,98,m.charcoalEdge);
+  bounds(shell,0,196,0,1.2,218,258,m.kitchenVeneer);
+  bounds(shell,0,322.5,0,1.2,362,258,m.kitchenVeneer);
+  bounds(shell,0,218,214,1.2,322.5,258,m.kitchenVeneer);
 
   // Fixed upper/lower tracks with one mesh group per folding leaf.
   const divider = item('Сгъваема стъклена преграда','Дневна и кабинет',
